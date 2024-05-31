@@ -44,7 +44,7 @@ const Home = () => {
   ];
   return (
     <div className="flex grow flex-col gap-5 p-4 text-white">
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <div className="relative flex items-center">
           <label className="absolute ml-2.5 mt-auto" htmlFor="">
             <i className="fa-solid fa-magnifying-glass"></i>
@@ -52,26 +52,26 @@ const Home = () => {
           <input
             type="text"
             placeholder="MineCripto.Shop"
-            className="border-b-1 border-solid border-white bg-transparent py-2 pl-10 font-meri outline-none"
+            className="border-b-1 border-solid border-white bg-transparent py-2 pl-10 outline-none"
           />
-          {/* <span className="border-1 border-solid border-sky-500 absolute w-full bottom-0"></span> */}
+          <span className="border-1 border-solid border-sky-500 absolute w-full bottom-0"></span>
         </div>
         <div className="flex items-center gap-4">
-          <button className="rounded-3xl bg-sky-500 px-8 py-1 font-bold hover:bg-sky-600">
+          <button className="rounded-3xl hover:bg-custom-hover hover:shadow-custom-inset relative border border-solid border-[#6f41d2] bg-[#6f41d2] px-10 py-2.5 text-sm font-medium leading-none text-white no-underline transition-all duration-300">
             Search
           </button>
           <a href="">
-            <i className="fa-solid fa-bell rounded-xl bg-[#27273f] p-2 text-white hover:bg-[#17182c]"></i>
+            <i className="fa-solid fa-bell rounded-full bg-[#27273f] p-3 text-white hover:bg-[#6f41d2]"></i>
           </a>
         </div>
-      </div>
+      </div> */}
       <div className="flex space-x-4 justify-center">
         {listItemToCheck.map((item, index) => {
           return (
             <div className="flex flex-col items-center" key={index}>
               <label
                 htmlFor={item.name}
-                className={`flex cursor-pointer flex-col items-center rounded-md border-1 border-solid ${formik.values.listChecked.includes(item.name) ? "border-green-500" : "border-gray-700 hover:border-gray-500"} transition-border px-8 py-4 duration-200`}
+                className={`hover:shadow-custom-inset-2 flex cursor-pointer flex-col items-center rounded-md border-1 border-solid ${formik.values.listChecked.includes(item.name) ? "border-[#6f41d2]" : "border-gray-700 hover:border-gray-500"} transition-border px-8 py-4 duration-200`}
               >
                 <img
                   src={item.img}
@@ -92,7 +92,7 @@ const Home = () => {
         })}
       </div>
       <div className="flex flex-col bg-[#27273f] rounded-2xl w-full h-full p-2 gap-2">
-        <div className="flex justify-around font-mono font-bold">
+        <div className="flex justify-around font-bold">
           <h3>Ai Minor</h3>
           <span>0</span>
           <p>Wallot Checked</p>

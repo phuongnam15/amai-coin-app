@@ -28,44 +28,55 @@ const statistics = [
     cost: "$0.00",
   },
 ];
+
+const menuItems = [
+  {
+    icon: "fa-solid fa-house",
+  },
+  {
+    icon: "fa-solid fa-file-pen",
+  },
+  {
+    icon: "fa-solid fa-compass",
+  },
+  {
+    icon: "fa-solid fa-gear",
+  },
+];
+
 const Layout = ({ children }) => {
   return (
     <div className="h-lvh w-lvw overflow-hidden bg-[#17182c]">
       <div className="m-auto flex h-full w-full gap-1 p-2">
-        <div className="flex flex-col items-center bg-[#27273f] p-3 overflow-auto rounded-s-2xl">
+        <div className="flex flex-col items-center overflow-auto rounded-s-2xl bg-[#27273f] p-3">
           <img src={dragon} alt={dragon} className="mt-2 h-12 w-12 flex-none" />
           <ul className="flex flex-1 flex-col justify-center gap-4 py-10">
-            <li className="rounded-full hover:bg-[#17182c]">
-              <a href="">
-                <i className="fa-solid fa-house p-3 text-white"></i>
-              </a>
-            </li>
-            <li className="rounded-full hover:bg-[#17182c]">
-              <a href="">
-                <i className="fa-solid fa-file-pen p-3 text-white"></i>
-              </a>
-            </li>
-            <li className="rounded-full hover:bg-[#17182c]">
-              <a href="">
-                <i className="fa-solid fa-compass p-3 text-white"></i>
-              </a>
-            </li>
-            <li className="rounded-full hover:bg-[#17182c]">
-              <a href="">
-                <i className="fa-solid fa-gear p-3 text-white"></i>
-              </a>
-            </li>
+            {menuItems.map((item, index) => {
+              return (
+                <li className="transition-border rounded-full border-1 border-solid border-[#27273f] text-white duration-500 hover:border-[#6f41d2]">
+                  <a href="">
+                    <i className={item.icon + " p-3"}></i>
+                  </a>
+                </li>
+              );
+            })}
           </ul>
-          <div className="flex h-72 flex-col items-center gap-2 justify-end">
-            <a href="">
-              <i className="fa-solid fa-bell rounded-full p-3 text-white hover:bg-[#17182c]"></i>
-            </a>
-            <img src={userImage} alt={userImage} className="h-8 w-8" />
+          <div className="flex h-72 flex-col items-center justify-end gap-2">
+            {/* <div className="transition-border rounded-full border-1 border-solid border-[#27273f] text-white duration-500 hover:border-[#6f41d2]">
+              <a href="">
+                <i className="fa-solid fa-bell p-3"></i>
+              </a>
+            </div> */}
+            <img
+              src={userImage}
+              alt={userImage}
+              className="h-8 w-8 cursor-pointer"
+            />
           </div>
         </div>
         <div className="flex flex-col items-center gap-1">
-          <div className="flex flex-col items-center gap-3 bg-[#27273f] p-4 grow rounded-se-2xl">
-            <div className="flex flex-col grow gap-2">
+          <div className="flex grow flex-col items-center gap-3 rounded-se-2xl bg-[#27273f] p-4">
+            <div className="flex grow flex-col gap-2">
               {statistics.map((statistic, index) => {
                 return (
                   <div className="flex gap-4" key={index}>
@@ -77,25 +88,29 @@ const Layout = ({ children }) => {
                       />
                     </div>
                     <div className="text-white">
-                      <p className="font-popi text-sm">{statistic.title}</p>
-                      <h2 className="font-bold">{statistic.cost}</h2>
+                      <p className="text-sm font-extralight">
+                        {statistic.title}
+                      </p>
+                      <h2 className="tracking-wider1 text-[14px] font-bold">
+                        {statistic.cost}
+                      </h2>
                     </div>
                   </div>
                 );
               })}
             </div>
-            <div className="flex flex-1 flex-col gap-2">
-              <button className="font-bold text-md rounded-md bg-red-600 hover:bg-red-500 px-12 py-2 text-white">
+            <div className="flex flex-1 flex-col justify-end gap-2">
+              <button className="hover:bg-custom-hover hover:shadow-custom-inset relative border border-solid border-[#6f41d2] bg-[#6f41d2] px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300">
                 Stop
               </button>
-              <button className="font-bold text-md rounded-md bg-green-600 hover:bg-green-500 px-12 py-2 text-white">
+              <button className="hover:bg-custom-hover hover:shadow-custom-inset relative border border-solid border-[#6f41d2] bg-[#6f41d2] px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300">
                 Run
               </button>
             </div>
           </div>
-          <div className="text-white text-center bg-[#27273f] w-full py-2 rounded-ee-2xl">
-              <h3 className="font-bold">Infinity Wallet Miner</h3>
-              <p className="text-sm">v 0.0.1</p>
+          <div className="w-full rounded-ee-2xl bg-[#27273f] py-2 text-center text-white">
+            <h3 className="font-bold">Infinity Wallet Miner</h3>
+            <p className="text-sm">v 0.0.1</p>
           </div>
         </div>
         <Outlet />
