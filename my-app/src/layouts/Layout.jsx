@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import dragon from "../assets/icons/japan.png";
 import userImage from "../assets/icons/user.png";
 import rabbit from "../assets/icons/rabbit.png";
@@ -32,15 +32,19 @@ const statistics = [
 const menuItems = [
   {
     icon: "fa-solid fa-house",
+    href: "/",
   },
   {
     icon: "fa-solid fa-file-pen",
+    href: "/check-key",
   },
   {
     icon: "fa-solid fa-compass",
+    href: "/check-key",
   },
   {
     icon: "fa-solid fa-gear",
+    href: "/check-key",
   },
 ];
 
@@ -54,9 +58,9 @@ const Layout = ({ children }) => {
             {menuItems.map((item, index) => {
               return (
                 <li className="transition-border rounded-full border-1 border-solid border-[#27273f] text-white duration-500 hover:border-[#6f41d2]">
-                  <a href="">
+                  <Link to={item.href}>
                     <i className={item.icon + " p-3"}></i>
-                  </a>
+                  </Link>
                 </li>
               );
             })}

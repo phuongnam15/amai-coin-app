@@ -6,7 +6,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     title: "",
     width: 1000,
-    height: 600,
+    height: 700,
     webPreferences: {
       contextIsolation: true, //tách biệt mt của renderer và main hoặc preload, tránh tác động từ renderer đến main hoặc preload
       nodeIntegration: false, //ngăn hoặc cho phép sử dụng require() của nodejs để tải các module, dù là false thì preload.js vần dùng đc require() do khác biệt với các renderer

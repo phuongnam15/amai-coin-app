@@ -97,10 +97,10 @@ const Home = () => {
           <span>0</span>
           <p>Wallot Checked</p>
         </div>
-        <div className="bg-[#17182c] h-[60%] rounded-xl"></div>
-        <p className="w-full text-center">12 seed phrase Found:</p>
-        <div className="bg-[#17182c] h-[20%] rounded-xl"></div>
-        <div className="bg-[#17182c] h-[10%] rounded-xl"></div>
+        <div className="bg-[#17182c] h-[60%] rounded-lg"></div>
+        <p className="w-full text-center text-[13px]">12 seed phrase Found:</p>
+        <div className="bg-[#17182c] h-[20%] rounded-lg"></div>
+        <div className="bg-[#17182c] h-[10%] rounded-lg"></div>
       </div>
     </div>
   );
