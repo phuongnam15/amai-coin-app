@@ -20,7 +20,7 @@ const CheckKey = () => {
             </p>
           </div>
         </div>
-        <p className="text-gray-300 text-center text-sm">
+        <p className="text-gray-300 text-center text-sm w-5/6">
           Vui lòng gửi mã bên dưới ( mất 2 ohuts để khởi tạo mã UUID ) và ảnh
           chụp thông tin thanh toán cho Admin qua các kênh bên dưới để nhận
           license key kích hoạt Tool
@@ -43,7 +43,7 @@ const CheckKey = () => {
           className="w-[80%] bg-transparent border-1 border-solid border-gray-700 text-gray-300 text-xs py-2 px-3 outline-none rounded"
         />
         <div className="flex gap-3">
-          <Link to="/" className="hover:bg-custom-hover hover:shadow-custom-inset relative border border-solid border-[#6f41d2] bg-[#6f41d2] px-7 py-2 text-xs font-bold leading-none text-white no-underline transition-all duration-300 rounded-md">Dùng thử</Link>
+          <Link to="/" className="hover:bg-custom-hover hover:shadow-custom-inset relative border border-solid border-purple-500 bg-purple-500 px-7 py-2 text-xs font-bold leading-none text-white no-underline transition-all duration-300 rounded-md">Dùng thử</Link>
           <Link to="/" className="hover:bg-custom-hover2 hover:shadow-custom-inset-pink relative border border-solid border-pink-500 bg-pink-500 px-7 py-2 text-xs font-bold leading-none text-white no-underline transition-all duration-300 rounded-md">Kích hoạt</Link>
         </div>
       </div>

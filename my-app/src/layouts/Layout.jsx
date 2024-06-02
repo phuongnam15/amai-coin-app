@@ -65,17 +65,15 @@ const Layout = ({ children }) => {
               );
             })}
           </ul>
-          <div className="flex h-72 flex-col items-center justify-end gap-2">
+          <div className="flex h-72 flex-col items-center justify-end">
             {/* <div className="transition-border rounded-full border-1 border-solid border-[#27273f] text-white duration-500 hover:border-[#6f41d2]">
               <a href="">
                 <i className="fa-solid fa-bell p-3"></i>
               </a>
             </div> */}
-            <img
-              src={userImage}
-              alt={userImage}
-              className="h-8 w-8 cursor-pointer"
-            />
+            <Link to="/">
+              <i className="fa-solid fa-circle-user fa-2xl pb-5 cursor-pointer hover:text-[#6f41d2] text-white transition-text duration-300"></i>
+            </Link>
           </div>
         </div>
         <div className="flex flex-col items-center gap-1">
