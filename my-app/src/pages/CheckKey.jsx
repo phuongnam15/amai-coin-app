@@ -5,7 +5,7 @@ import rabbit from "../assets/icons/rabbit.png";
 const CheckKey = () => {
   return (
     <div className="flex h-lvh w-lvw items-center justify-center bg-[#17182c]">
-      <div className="flex h-5/6 w-1/2 flex-col items-center justify-center rounded-lg bg-[#27273f] gap-5 p-5">
+      <div className="flex h-5/6 w-2/3 sm:w-1/2 xl:w-1/3 flex-col items-center justify-center rounded-lg bg-[#27273f] gap-5 p-5">
         <img src={rabbit} alt={rabbit} className="w-16 h-16"/>
         <div className="flex flex-col justify-center items-center">
           <h1 className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-3xl font-black text-transparent">
