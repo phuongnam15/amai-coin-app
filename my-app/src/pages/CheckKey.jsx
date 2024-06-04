@@ -1,17 +1,64 @@
-
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import rabbit from "../assets/icons/rabbit.png";
+import { useContext, useEffect, useState } from "react";
+import toastContext from "../contexts/toastContext";
+import { useFormik } from "formik";
 
 const CheckKey = () => {
+  const navigate = useNavigate();
+  const { toast } = useContext(toastContext);
+  const ipcRenderer = window.ipcRenderer;
+  const [userKey, setUserKey] = useState("");
+  const formik = useFormik({
+    initialValues: {
+      privateKey: "9f3972453fbdad82c354af80f8892ba05087b37d1b21d8937ccb20b808501348",
+    },
+  });
+  const handleCopy = () => {
+    navigator.clipboard
+      .writeText(userKey)
+      .then(() => {
+        toast("Copied !", "success");
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
+  };
+  const handleActivePrivateKey = () => {
+    ipcRenderer.send("active:private-key", {
+      privateKey: formik.values.privateKey,
+    });
+    ipcRenderer.on("active:private-key", (event, data) => {
+      if(data.response === "OK") {
+        toast("Activated !", "success");
+        navigate("/start");
+      }else{
+        toast(data.response, "error");
+      }
+    });
+  };
+  
+  useEffect(() => {
+    ipcRenderer.send("get-key", {});
+    ipcRenderer.on("get-key", (event, data) => {
+      setUserKey(data.userKey);
+    });
+    ipcRenderer.send("check:private-key", {});
+    ipcRenderer.on("check:private-key", (event, data) => {
+      if(data.response === "OK") {
+        navigate("/start");
+      }
+    });
+  }, []);
   return (
     <div className="flex h-lvh w-lvw items-center justify-center bg-[#17182c]">
-      <div className="flex h-5/6 w-2/3 sm:w-1/2 xl:w-1/3 flex-col items-center justify-center rounded-lg bg-[#27273f] gap-5 p-5">
-        <img src={rabbit} alt={rabbit} className="w-16 h-16"/>
-        <div className="flex flex-col justify-center items-center">
+      <div className="flex h-5/6 w-2/3 flex-col items-center justify-center gap-5 rounded-lg bg-[#27273f] p-5 sm:w-1/2 xl:w-1/3">
+        <img src={rabbit} alt={rabbit} className="h-16 w-16" />
+        <div className="flex flex-col items-center justify-center">
           <h1 className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-3xl font-black text-transparent">
             ETH SCANNER
           </h1>
-          <div className="flex gap-2 w-[90%]">
+          <div className="flex w-[90%] gap-2">
             <p className="w-1/2 rounded border-1 border-solid border-gray-700 py-0.5 text-center text-[10px] text-gray-400">
               VIETNAMESE
             </p>
@@ -20,31 +67,54 @@ const CheckKey = () => {
             </p>
           </div>
         </div>
-        <p className="text-gray-300 text-center text-sm w-5/6">
-          Vui lòng gửi mã bên dưới ( mất 2 ohuts để khởi tạo mã UUID ) và ảnh
-          chụp thông tin thanh toán cho Admin qua các kênh bên dưới để nhận
-          license key kích hoạt Tool
+        <p className="w-5/6 text-center text-sm text-gray-300">
+          Please submit the code below and a photo capture payment information
+          for Admin via the channels below to receive private key activation
+          tool
         </p>
         <div className="flex gap-2">
-            <a href="" className="font-bold text-green-400 text-xs">Telegram</a>
-            <a href="" className="font-bold text-green-400 text-xs">Telegram Chanel</a>
+          <a href="" className="text-xs font-bold text-green-400">
+            Telegram
+          </a>
+          <a href="" className="text-xs font-bold text-green-400">
+            Telegram Chanel
+          </a>
         </div>
         <div className="flex w-[80%]">
           <input
+            readOnly
             type="text"
-            value="jbnnIUknIukln78Guh78ih8bihibiuhN8hiub7IIBIBuibih7ijn"
-            className="flex-1 bg-transparent border-1 border-solid border-gray-700 text-gray-300 text-xs py-2 px-3 outline-none rounded-s"
+            value={userKey}
+            className="flex-1 rounded-s border-1 border-solid border-gray-700 bg-transparent px-3 py-2 text-xs text-gray-300 outline-none"
           />
-          <button className="text-green-400 px-4 font-bold bg-gray-700 rounded-e text-xs hover:bg-gray-600">Sao chép</button>
+          <button
+            className="rounded-e bg-gray-700 px-4 text-xs font-bold text-green-400 hover:bg-gray-600"
+            onClick={() => handleCopy()}
+          >
+            Copy
+          </button>
         </div>
         <input
+          id="privateKey"
           type="text"
-          value="jbnnIUknIukln78Guh78ih8bihibiuhN8hiub7IIBIBuibih7ijn"
-          className="w-[80%] bg-transparent border-1 border-solid border-gray-700 text-gray-300 text-xs py-2 px-3 outline-none rounded"
+          value="9f3972453fbdad82c354af80f8892ba05087b37d1b21d8937ccb20b808501348"
+          placeholder="Enter private key here..."
+          className="w-[80%] rounded border-1 border-solid border-gray-700 bg-transparent px-3 py-2 text-xs text-gray-300 outline-none"
+          onChange={formik.handleChange}
         />
         <div className="flex gap-3">
-          <Link to="/" className="hover:bg-custom-hover hover:shadow-custom-inset relative border border-solid border-purple-500 bg-purple-500 px-7 py-2 text-xs font-bold leading-none text-white no-underline transition-all duration-300 rounded-md">Dùng thử</Link>
-          <Link to="/" className="hover:bg-custom-hover2 hover:shadow-custom-inset-pink relative border border-solid border-pink-500 bg-pink-500 px-7 py-2 text-xs font-bold leading-none text-white no-underline transition-all duration-300 rounded-md">Kích hoạt</Link>
+          <Link
+            to="/start"
+            className="relative rounded-md border border-solid border-purple-500 bg-purple-500 px-7 py-2 text-xs font-bold leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover hover:shadow-custom-inset"
+          >
+            Try it out
+          </Link>
+          <button
+            className="relative rounded-md border border-solid border-pink-500 bg-pink-500 px-7 py-2 text-xs font-bold leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover2 hover:shadow-custom-inset-pink"
+            onClick={() => handleActivePrivateKey()}
+          >
+            Active
+          </button>
         </div>
       </div>
     </div>
