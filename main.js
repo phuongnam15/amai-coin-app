@@ -67,18 +67,18 @@ ipcMain.on("stop", async (event, arg) => {
 ipcMain.on("get-key", async (event, arg) => {
   event.sender.send("get-key", { userKey });
 });
-ipcMain.on("active:private-key", async (event, arg) => {
+ipcMain.on("active:key", async (event, arg) => {
   try {
-    const response = await handleActivePrivateKey(arg.privateKey);
-    event.sender.send("active:private-key", { response });
+    const response = await handleActivePrivateKey(arg.activeKey);
+    event.sender.send("active:key", { response });
   } catch (error) {
     console.error("Error:", error);
   }
 });
-ipcMain.on("check:private-key", async (event, arg) => {
+ipcMain.on("check:active-key", async (event, arg) => {
   try{
     const response = await handleCheckPrivateKey();
-    event.sender.send("check:private-key", { response });
+    event.sender.send("check:active-key", { response });
   }catch(err) {
     console.error("Error:", err);
   }
@@ -86,7 +86,7 @@ ipcMain.on("check:private-key", async (event, arg) => {
 function handleCheckPrivateKey() {
   return new Promise((resolve, reject) => {
     db.get(
-      `SELECT private_key, user_key FROM keys WHERE user_key = ?`,
+      `SELECT active_key, user_key FROM keys WHERE user_key = ?`,
       [userKey],
       (err, row) => {
         if (err) {
@@ -97,7 +97,7 @@ function handleCheckPrivateKey() {
             .createHash("sha256")
             .update(userKey + salt)
             .digest("hex");
-          if (row.private_key !== null && row.private_key === hashedUserKey) {
+          if (row.active_key !== null && row.active_key === hashedUserKey) {
             resolve("OK");
           } 
         }
@@ -106,7 +106,7 @@ function handleCheckPrivateKey() {
     );
   });
 }
-function handleActivePrivateKey(privateKey) {
+function handleActivePrivateKey(activeKey) {
   return new Promise((resolve, reject) => {
     db.get(
       `SELECT user_key FROM keys WHERE user_key = ?`,
@@ -120,22 +120,22 @@ function handleActivePrivateKey(privateKey) {
             .createHash("sha256")
             .update(userKey + salt)
             .digest("hex");
-          if (hashedUserKey === privateKey) {
+          if (hashedUserKey === activeKey) {
             db.run(
-              `UPDATE keys SET private_key = ? WHERE user_key = ?`,
-              [privateKey, userKey],
+              `UPDATE keys SET active_key = ? WHERE user_key = ?`,
+              [activeKey, userKey],
               function (err) {
                 if (err) {
                   console.error(err.message);
                   reject(err);
                 } else {
-                  console.log(`A new private key has been updated`);
+                  console.log(`A new active key has been updated`);
                   resolve("OK");
                 }
               }
             );
           } else {
-            resolve("Invalid Private Key");
+            resolve("Invalid Active Key");
           }
         } else {
           resolve("User Key Not Found");
@@ -168,7 +168,7 @@ function checkAndInsertKey(key) {
 function createTableAndStoreKey(key) {
   db.run(
     `CREATE TABLE IF NOT EXISTS keys (
-      private_key TEXT NOT NULL,
+      active_key TEXT NOT NULL,
       user_key TEXT NOT NULL
   )`,
     (err) => {

@@ -11,7 +11,7 @@ const CheckKey = () => {
   const [userKey, setUserKey] = useState("");
   const formik = useFormik({
     initialValues: {
-      privateKey: "9f3972453fbdad82c354af80f8892ba05087b37d1b21d8937ccb20b808501348",
+      activeKey: "9f3972453fbdad82c354af80f8892ba05087b37d1b21d8937ccb20b808501348",
     },
   });
   const handleCopy = () => {
@@ -25,10 +25,10 @@ const CheckKey = () => {
       });
   };
   const handleActivePrivateKey = () => {
-    ipcRenderer.send("active:private-key", {
-      privateKey: formik.values.privateKey,
+    ipcRenderer.send("active:key", {
+      activeKey: formik.values.activeKey,
     });
-    ipcRenderer.on("active:private-key", (event, data) => {
+    ipcRenderer.on("active:key", (event, data) => {
       if(data.response === "OK") {
         toast("Activated !", "success");
         navigate("/start");
@@ -43,8 +43,8 @@ const CheckKey = () => {
     ipcRenderer.on("get-key", (event, data) => {
       setUserKey(data.userKey);
     });
-    ipcRenderer.send("check:private-key", {});
-    ipcRenderer.on("check:private-key", (event, data) => {
+    ipcRenderer.send("check:active-key", {});
+    ipcRenderer.on("check:active-key", (event, data) => {
       if(data.response === "OK") {
         navigate("/start");
       }
@@ -95,7 +95,7 @@ const CheckKey = () => {
           </button>
         </div>
         <input
-          id="privateKey"
+          id="activeKey"
           type="text"
           value="9f3972453fbdad82c354af80f8892ba05087b37d1b21d8937ccb20b808501348"
           placeholder="Enter private key here..."
