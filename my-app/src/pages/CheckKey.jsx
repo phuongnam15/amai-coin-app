@@ -59,10 +59,10 @@ const CheckKey = () => {
             ETH SCANNER
           </h1>
           <div className="flex w-[90%] gap-2">
-            <p className="w-1/2 rounded border-1 border-solid border-gray-700 py-0.5 text-center text-[10px] text-gray-400">
+            <p className="flex-1 rounded border-1 border-solid border-gray-700 py-0.5 text-center text-[10px] text-gray-400">
               VIETNAMESE
             </p>
-            <p className="w-1/2 rounded border-1 border-solid border-gray-700 py-0.5 text-center text-[10px] text-gray-400">
+            <p className="flex-1 rounded border-1 border-solid border-gray-700 py-0.5 text-center text-[10px] text-gray-400">
               ENGLISH
             </p>
           </div>
@@ -102,15 +102,15 @@ const CheckKey = () => {
           className="w-[80%] rounded border-1 border-solid border-gray-700 bg-transparent px-3 py-2 text-xs text-gray-300 outline-none"
           onChange={formik.handleChange}
         />
-        <div className="flex gap-3">
+        <div className="flex gap-3 w-[60%] mt-4">
           <Link
             to="/start"
-            className="relative rounded-md border border-solid border-purple-500 bg-purple-500 px-7 py-2 text-xs font-bold leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover hover:shadow-custom-inset"
+            className="text-center py-2 flex-1 relative rounded border border-solid border-purple-500 bg-purple-500 text-xs font-bold leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover hover:shadow-custom-inset"
           >
             Try it out
           </Link>
           <button
-            className="relative rounded-md border border-solid border-pink-500 bg-pink-500 px-7 py-2 text-xs font-bold leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover2 hover:shadow-custom-inset-pink"
+            className="py-2 flex-1 relative rounded border border-solid border-pink-500 bg-pink-500 text-xs font-bold leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover2 hover:shadow-custom-inset-pink"
             onClick={() => handleActivePrivateKey()}
           >
             Active

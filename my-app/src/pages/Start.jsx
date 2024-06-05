@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState, useId } from "react";
+import toastContext from "../contexts/toastContext";
 const { useFormik } = require("formik");
 const rabbit = require("../assets/icons/rabbit.png");
 const thunder = require("../assets/icons/thunder.png");
@@ -11,20 +12,45 @@ const Start = () => {
   const divRef1 = useRef(null);
   const [totalPrivateKeys, setTotalPrivateKeys] = useState(0);
   const [totalScan, setTotalScan] = useState("0");
+  const [totalBalance, setTotalBalance] = useState(0);
+  const { toast } = useContext(toastContext);
+  const uniqueId = useId();
+  const [isPause, setIsPause] = useState(true);
+  const [isRenew, setIsRenew] = useState(false);
   const formik = useFormik({
     initialValues: {
       listChecked: ["ethereum"],
     },
   });
+
   const handleStart = () => {
     if (formik.values.listChecked.length === 0) {
       alert("Please choose a coin to mine");
       return;
     }
+    setIsPause(false);
     ipcRenderer.send("start", { listChecked: formik.values.listChecked });
   };
-  const handleStop = () => {
+  const handlePause = () => {
     ipcRenderer.send("stop", {});
+    setIsPause(true);
+    setIsRenew(true);
+  };
+  const handleRenew = () => {
+    ipcRenderer.send("renew", {});
+
+    if (divRef.current) {
+      divRef.current.innerHTML = "";
+    }
+    if (divRef1.current) {
+      divRef1.current.innerHTML = "";
+    }
+
+    setIsRenew(false);
+    setIsPause(true);
+    setTotalPrivateKeys(0)
+    setTotalBalance(0);
+    setTotalScan("0");
   };
   const handleChecked = (name) => {
     const { listChecked } = formik.values;
@@ -76,7 +102,7 @@ const Start = () => {
     {
       img: dollar,
       title: "Balance",
-      cost: "0",
+      cost: totalBalance,
     },
     {
       img: thunder,
@@ -84,26 +110,55 @@ const Start = () => {
       cost: "0",
     },
   ];
-
+  const handleCopy = (text) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast("Copied !", "success");
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
+  };
+  function cssEscape(value) {
+    if (value) {
+      return value.replace(/([^\w-])/g, "\\$1");
+    }
+    return value;
+  }
   useEffect(() => {
     const handleLog = (event, data) => {
       if (!divRef.current) return;
       divRef.current.insertAdjacentHTML("beforeend", `<p>${data.message}</p>`);
       divRef.current.scrollTop = divRef.current.scrollHeight;
-      setTotalScan(data?.message?.split(" ")[0]);
-      if (
-        data.message.includes("Success") ||
-        data.message.includes("Private")
-      ) {
-        divRef1.current.insertAdjacentHTML(
-          "beforeend",
-          `<p>${data.message}</p>`,
-        );
+      setTotalScan(data?.qty);
+
+      if (data.message.includes("Success")) {
+        const parts = data.message.split(" ");
+        const firstThree = parts.slice(0, 3).join(" ");
+        const last = parts[3];
+        const escapeId = cssEscape(uniqueId);
+
+        const html = `
+          <div class="flex gap-2 items-center">
+            <p>${firstThree}</p>
+            <button class="rounded bg-gray-700 px-2 py-1 text-xs font-bold text-green-400 hover:bg-gray-600" id="${uniqueId}" data-last="${last}">Copy</button>
+          </div>
+        `;
+
+        divRef1.current.insertAdjacentHTML("beforeend", html);
+        const copyButton = divRef1.current.querySelector(`#${escapeId}`);
+        if (copyButton) {
+          copyButton.onclick = () => handleCopy(last);
+        }
         divRef1.current.scrollTop = divRef1.current.scrollHeight;
         setTotalPrivateKeys((prev) => prev + 1);
       }
     };
     ipcRenderer.on("log", handleLog);
+    ipcRenderer.on("balance", (event, data) => {
+      setTotalBalance((prev) => prev + parseInt(data.balance));
+    });
   }, []);
 
   return (
@@ -132,18 +187,31 @@ const Start = () => {
             })}
           </div>
           <div className="flex flex-1 flex-col justify-end gap-2">
-            <button
-              onClick={() => handleStop()}
-              className="relative border border-solid border-[#6f41d2] bg-[#6f41d2] px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover hover:shadow-custom-inset"
-            >
-              Stop
-            </button>
-            <button
-              onClick={() => handleStart()}
-              className="relative border border-solid border-[#6f41d2] bg-[#6f41d2] px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover hover:shadow-custom-inset"
-            >
-              Start
-            </button>
+            {isRenew ? (
+              <button
+                onClick={() => handleRenew()}
+                className="relative border border-solid border-pink-600 bg-pink-600 px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover2 hover:shadow-custom-inset-pink"
+              >
+                Renew
+              </button>
+            ) : (
+              <></>
+            )}
+            {isPause ? (
+              <button
+                onClick={() => handleStart()}
+                className="relative border border-solid border-[#6f41d2] bg-[#6f41d2] px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover hover:shadow-custom-inset"
+              >
+                Start
+              </button>
+            ) : (
+              <button
+                onClick={() => handlePause()}
+                className="hover:bg-custom-hover3 hover:shadow-custom-gray relative border border-solid border-gray-500 bg-gray-500 px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300"
+              >
+                Pause
+              </button>
+            )}
           </div>
         </div>
         <div className="w-full rounded-ee-2xl bg-[#27273f] py-2 text-center text-white">
@@ -151,7 +219,7 @@ const Start = () => {
           <p className="text-sm">v 0.0.1</p>
         </div>
       </div>
-      <div className="flex grow flex-col gap-5 p-4 text-white">
+      <div className="flex grow flex-col gap-5 px-4 pt-4 text-white">
         <div className="flex justify-center space-x-4">
           {listItemToCheck.map((item, index) => {
             return (
@@ -178,7 +246,7 @@ const Start = () => {
             );
           })}
         </div>
-        <div className="flex h-full w-full flex-col gap-2 rounded-2xl bg-[#27273f] p-2 overflow-auto">
+        <div className="flex h-full w-full flex-col gap-2 overflow-auto rounded-2xl bg-[#27273f] p-3">
           {/* <div className="flex justify-around font-bold">
             <h3>Ai Minor</h3>
             <span>0</span>
@@ -186,17 +254,15 @@ const Start = () => {
           </div> */}
           <div
             ref={divRef}
-            className="h-[60%] w-full overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-gray-400"
-          >
-          </div>
+            className="h-[60%] w-full grow overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-gray-400"
+          ></div>
           <p className="w-full text-center text-[13px]">
             {totalPrivateKeys} Private Keys found
           </p>
           <div
             ref={divRef1}
             className="h-[20%] overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-green-500"
-          >
-          </div>
+          ></div>
           <div className="h-[10%] rounded-lg bg-[#17182c]"></div>
         </div>
       </div>

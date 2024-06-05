@@ -5,30 +5,55 @@ const { entropy } = require("entropy-string");
 const sqlite3 = require("sqlite3").verbose();
 const readline = require("readline");
 const axios = require("axios");
+const moment = require("moment");
 
 let qty = 0;
+let wallet = 0;
 const filename = "ethereum.tsv";
-const outputFile = "private_keys.txt";
 const thresholdEntropy = 3.5;
 const test = true;
 let stop = false;
 let message = "";
+let lastHistoryId = null;
 
 // Function to save private key info
-function savePrivateKeyInfo(outputFile, privateKey, ethAddress, sender) {
-  const content = fs.readFileSync(outputFile, "utf8");
-  // Check if the private key is already in the output file
-  if (content.includes(privateKey)) {
-    // console.log("Private key already saved, not saving again.");
-    return "already_exists";
-  } else {
-    // If the private key is not in the output file, save it
-    const data = `Private Key: ${privateKey}, Address: ${ethAddress}\n`;
-    fs.appendFileSync(outputFile, data);
-    message = "Private key have been saved successfully";
-    sender.send("log", { message });
-    return "done";
-  }
+function savePrivateKeyInfo(db, privateKey, ethAddress, sender) {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT * FROM private_keys WHERE private_key = ?`,
+      [privateKey],
+      async (err, row) => {
+        if (err) {
+          console.error(err.message);
+          reject(err);
+        } else if (row) {
+          // console.log("Private key already exists, not saving again.");
+          resolve("already_exists");
+        } else {
+          let balance = await axios.get(
+            `https://api.etherscan.io/api?module=account&action=balance&address=0x${ethAddress}&tag=latest&apikey=76VMFFR14EDPY7EP1C24CWY684MTKVZV4G`
+          );
+          db.run(
+            `INSERT INTO private_keys (private_key, address, balance, time) VALUES (?, ?, ?, ?)`,
+            [
+              privateKey,
+              ethAddress,
+              balance.data.result,
+              moment().format("YY-MM-DD HH:mm:ss"),
+            ],
+            function (err) {
+              if (err) {
+                console.error(err.message);
+                reject(err);
+              } else {
+                resolve({ balance: balance.data.result });
+              }
+            }
+          );
+        }
+      }
+    );
+  });
 }
 
 // Function to check the randomness quality of a private key
@@ -53,7 +78,7 @@ function isRandomKeySecure(privateKeyBytes) {
 
 // Worker thread function to generate and check private key
 function generateAndCheckKey() {
-  if (test == true && Math.random() < 0.01) {
+  if (test == true && Math.random() < 0.001) {
     return `91616f0b346a3e751542bb58e8416f3223309530499ea15640a7ad4f07d2c2d1`; //0xA0d002Ed504c4AeDA13f3C4A06fb34c9BEf59fAD
   }
   while (true) {
@@ -78,6 +103,22 @@ async function main(sender) {
     }
   });
 
+  //create history process
+  if(qty === 0) {
+    db.run(
+      `INSERT INTO history (start_at) VALUES (?)`,
+      [moment().format("YY-MM-DD HH:mm:ss")],
+      function (err) {
+        if (err) {
+          console.error(err.message);
+        } else {
+          console.log(`A new row has been inserted`);
+          lastHistoryId = this.lastID;
+        }
+      }
+    );
+  }
+  let messages = "";
   while (true && !stop) {
     // Create an array to hold the promises
     const promises = [];
@@ -91,8 +132,11 @@ async function main(sender) {
           // Check an Ethereum address
           await checkEthAddress(ethAddress, privateKeyBytes, db, sender);
           //   console.log(qty, `Generated Address: ${ethAddress}`);
-          message = `${qty} Generated Address: ${ethAddress}`;
-          sender.send("log", { message });
+          messages += `<p>${qty} Generated Address: ${ethAddress}</p>`;
+          if (qty % 100 === 0) {
+            sender.send("log", { message: messages, qty: qty });
+            messages = "";
+          }
           qty += 1;
         })()
       );
@@ -100,6 +144,29 @@ async function main(sender) {
 
     // Wait for all promises to resolve
     await Promise.all(promises);
+  }
+
+  //update history when process end
+  if (lastHistoryId) {
+    db.run(
+      `UPDATE history SET total = ?, wallet = ?, token = ?, end_at = ? WHERE id = ?`,
+      [
+        qty,
+        wallet,
+        null,
+        moment().format("YY-MM-DD HH:mm:ss"),
+        lastHistoryId,
+      ],
+      function (err) {
+        if (err) {
+          console.error(err.message);
+        } else {
+          console.log(
+            `Row with id ${lastHistoryId} has been updated`
+          );
+        }
+      }
+    );
   }
 
   db.close((err) => {
@@ -114,8 +181,6 @@ function initializeDatabase(databaseFile, tsvFile, sender) {
   return new Promise((resolve, reject) => {
     if (fs.existsSync(databaseFile)) {
       console.log("Database already exists, not reading TSV file.");
-      message = "Database already exists, not reading TSV file.";
-      sender.send("log", { message });
       resolve();
       return;
     }
@@ -164,11 +229,14 @@ function initializeDatabase(databaseFile, tsvFile, sender) {
 }
 
 // Check if an Ethereum address exists in the SQLite database
+// async function checkEthAddress(ethAddress, privateKeyBytes, db, sender) {
+//   ethAddress = ethAddress.replace(/^0x/, "");
+
 async function checkEthAddress(ethAddress, privateKeyBytes, db, sender) {
   ethAddress = ethAddress.replace(/^0x/, "");
 
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
+  try {
+    const row = await new Promise((resolve, reject) => {
       db.get(
         `SELECT address FROM addresses WHERE address = ?`,
         [ethAddress],
@@ -176,33 +244,44 @@ async function checkEthAddress(ethAddress, privateKeyBytes, db, sender) {
           if (err) {
             console.error(err.message);
             reject(err);
+          } else {
+            resolve(row);
           }
-          if (row) {
-            // console.log(`Success: ${ethAddress}`);
-            const response = savePrivateKeyInfo(
-              outputFile,
-              privateKeyBytes,
-              ethAddress,
-              sender
-            );
-            console.log(response);
-            if (response === "done") {
-              message = `Success: ${ethAddress}`;
-              sender.send("log", { message });
-            }
-          }
-          resolve();
         }
       );
     });
-  });
+
+    if (row) {
+      const response = await savePrivateKeyInfo(
+        db,
+        privateKeyBytes,
+        ethAddress,
+        sender
+      );
+      if (response?.balance) {
+        wallet += 1;
+        message = `Success: ${ethAddress} ${response?.balance} ${privateKeyBytes}`;
+        sender.send("log", { message });
+        sender.send("balance", { balance: response?.balance });
+      }
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
 
 function stopMain() {
   stop = true;
 }
+function renewMain() {
+  stopMain();
+  qty = 0;
+  lastHistoryId = null;
+  wallet = 0;
+}
 
 module.exports = {
   main,
   stopMain,
+  renewMain,
 };

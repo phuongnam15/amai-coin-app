@@ -6,11 +6,12 @@ export const ToastContextProvider = ({ children }) => {
   const Toastify = window.Toastify;
   const styleAlert = {
     position: "fixed",
-    padding: "2px 0",
-    width: "100%",
+    padding: "2px 20px",
+    // maxWidth: "10%",
     color: "white",
     textAlign: "center",
     fontSize: "0.85rem",
+    right: "0px",
   };
   const toast = (message, color) => {
     Toastify.toast({
