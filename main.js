@@ -61,7 +61,10 @@ const salt = "amai_scanner";
 
 ipcMain.on("start", async (event, arg) => {
   const sender = event.sender;
-  await main(sender);
+
+  const numThreads = await getNumThreads();
+
+  await main(sender, numThreads);
 });
 ipcMain.on("stop", async (event, arg) => {
   stopMain();
@@ -104,6 +107,23 @@ ipcMain.on("recommend:threads", async (event, arg) => {
   const threads = os.cpus().length;
   event.sender.send("recommend:threads", { threads: threads * 2 });
 });
+
+const getNumThreads = async () => {
+  return new Promise((resolve, reject) => {
+    db.get("SELECT threads FROM config", [], (err, row) => {
+      if (err) {
+        console.error(err.message);
+        reject(err);
+      } else {
+        if (row) {
+          resolve(row.threads);
+        } else {
+          resolve(os.cpus().length);
+        }
+      }
+    });
+  });
+};
 function saveConfig(config) {
   return new Promise((resolve, reject) => {
     db.get("SELECT * FROM config", [], (err, row) => {
@@ -274,17 +294,6 @@ function checkThreadsCPUAndSave() {
       console.error(err.message);
     } else {
       if (row) {
-        db.run(
-          `UPDATE config SET threads = ?`,
-          [threads],
-          function (err) {
-            if (err) {
-              console.error(err.message);
-            } else {
-              console.log(`Threads has been updated`);
-            }
-          }
-        );
       } else {
         db.run(
           `INSERT INTO config (threads) VALUES (?)`,
