@@ -261,7 +261,7 @@ const Start = () => {
           </p>
           <div
             ref={divRef1}
-            className="h-[20%] overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-green-500"
+            className="h-[20%] overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-green-500 flex flex-col gap-1"
           ></div>
           <div className="h-[10%] rounded-lg bg-[#17182c]"></div>
         </div>

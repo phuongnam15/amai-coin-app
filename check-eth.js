@@ -13,11 +13,10 @@ const filename = "ethereum.tsv";
 const thresholdEntropy = 3.5;
 const test = true;
 let stop = false;
-let message = "";
 let lastHistoryId = null;
 
 // Function to save private key info
-function savePrivateKeyInfo(db, privateKey, ethAddress, sender) {
+function savePrivateKeyInfo(db, privateKey, ethAddress) {
   return new Promise((resolve, reject) => {
     db.get(
       `SELECT * FROM private_keys WHERE private_key = ?`,
@@ -93,7 +92,7 @@ function generateAndCheckKey() {
 async function main(sender) {
   stop = false;
   // Initialize the database
-  await initializeDatabase("eth1.db", filename, sender);
+  await initializeDatabase("eth1.db", filename);
 
   const db = new sqlite3.Database("eth1.db", (err) => {
     if (err) {
@@ -177,7 +176,7 @@ async function main(sender) {
 }
 
 // Initialize SQLite database
-function initializeDatabase(databaseFile, tsvFile, sender) {
+function initializeDatabase(databaseFile, tsvFile) {
   return new Promise((resolve, reject) => {
     if (fs.existsSync(databaseFile)) {
       console.log("Database already exists, not reading TSV file.");
@@ -229,9 +228,6 @@ function initializeDatabase(databaseFile, tsvFile, sender) {
 }
 
 // Check if an Ethereum address exists in the SQLite database
-// async function checkEthAddress(ethAddress, privateKeyBytes, db, sender) {
-//   ethAddress = ethAddress.replace(/^0x/, "");
-
 async function checkEthAddress(ethAddress, privateKeyBytes, db, sender) {
   ethAddress = ethAddress.replace(/^0x/, "");
 
@@ -256,12 +252,10 @@ async function checkEthAddress(ethAddress, privateKeyBytes, db, sender) {
         db,
         privateKeyBytes,
         ethAddress,
-        sender
       );
       if (response?.balance) {
         wallet += 1;
-        message = `Success: ${ethAddress} ${response?.balance} ${privateKeyBytes}`;
-        sender.send("log", { message });
+        sender.send("log", { message: `Success: ${ethAddress} ${response?.balance} ${privateKeyBytes}` });
         sender.send("balance", { balance: response?.balance });
       }
     }
