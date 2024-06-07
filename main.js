@@ -7,15 +7,6 @@ const crypto = require("crypto");
 const sqlite3 = require("sqlite3").verbose();
 const os = require("os");
 
-const styleAlert = {
-  position: "fixed",
-  padding: "2px 0",
-  width: "100%",
-  color: "white",
-  textAlign: "center",
-  fontSize: "0.85rem",
-};
-
 function createWindow() {
   mainWindow = new BrowserWindow({
     title: "",
@@ -106,6 +97,10 @@ ipcMain.on("config", async (event, arg) => {
 ipcMain.on("recommend:threads", async (event, arg) => {
   const threads = os.cpus().length;
   event.sender.send("recommend:threads", { threads: threads * 2 });
+});
+ipcMain.on("get:threads", async (event, arg) => {
+  const threads = await getNumThreads();
+  event.sender.send("get:threads", { threads: threads });
 });
 
 const getNumThreads = async () => {
@@ -275,7 +270,7 @@ function checkAndInsertKey(key) {
 function createTableAndStoreKey(key) {
   db.run(
     `CREATE TABLE IF NOT EXISTS keys (
-      active_key TEXT NOT NULL,
+      active_key TEXT NULL,
       user_key TEXT NOT NULL
   )`,
     (err) => {
@@ -310,17 +305,27 @@ function checkThreadsCPUAndSave() {
     }
   });
 }
-const db = new sqlite3.Database("./eth1.db", (err) => {
+const db = new sqlite3.Database("./btc.db", (err) => {
   if (err) {
     console.error(err.message);
   } else {
-    console.log("Connected to the eth1.db database.");
+    console.log("Connected to the btc.db database.");
     createTableAndStoreKey(userKey);
   }
 });
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
+    stopMain();
+    
+    db.close((err) => {
+      if (err) {
+        console.error(err.message);
+      }else{
+        console.log("Close database");
+      }
+    });
+
     app.quit();
   }
 });

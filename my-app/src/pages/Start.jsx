@@ -17,6 +17,8 @@ const Start = () => {
   const uniqueId = useId();
   const [isPause, setIsPause] = useState(true);
   const [isRenew, setIsRenew] = useState(false);
+  const [threads, setThreads] = useState(0);
+  const [idInterval, setIdInterval] = useState(null);
   const formik = useFormik({
     initialValues: {
       listChecked: ["ethereum"],
@@ -48,7 +50,7 @@ const Start = () => {
 
     setIsRenew(false);
     setIsPause(true);
-    setTotalPrivateKeys(0)
+    setTotalPrivateKeys(0);
     setTotalBalance(0);
     setTotalScan("0");
   };
@@ -107,7 +109,7 @@ const Start = () => {
     {
       img: thunder,
       title: "Threads",
-      cost: "0",
+      cost: threads,
     },
   ];
   const handleCopy = (text) => {
@@ -128,12 +130,21 @@ const Start = () => {
   }
   useEffect(() => {
     const handleLog = (event, data) => {
-      if (!divRef.current) return;
-      divRef.current.insertAdjacentHTML("beforeend", `<p>${data.message}</p>`);
-      divRef.current.scrollTop = divRef.current.scrollHeight;
-      setTotalScan(data?.qty);
+      if (data.messages) {
+        const fragment = document.createDocumentFragment();
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = data.messages;
 
-      if (data.message.includes("Success")) {
+        while (tempDiv.firstChild) {
+          fragment.appendChild(tempDiv.firstChild);
+        }
+
+        divRef.current.appendChild(fragment);
+        divRef.current.scrollTop = divRef.current.scrollHeight;
+        setTotalScan(data?.qty);
+      }
+
+      if (data.message && data.message !== "") {
         const parts = data.message.split(" ");
         const firstThree = parts.slice(0, 3).join(" ");
         const last = parts[3];
@@ -154,11 +165,17 @@ const Start = () => {
         divRef1.current.scrollTop = divRef1.current.scrollHeight;
         setTotalPrivateKeys((prev) => prev + 1);
       }
+      if (data.balance !== 0) {
+        setTotalBalance((prev) => prev + data.balance);
+      }
     };
+    const handleThreads = (event, data) => {
+      setThreads(data.threads);
+    };
+
     ipcRenderer.on("log", handleLog);
-    ipcRenderer.on("balance", (event, data) => {
-      setTotalBalance((prev) => prev + parseInt(data.balance));
-    });
+    ipcRenderer.send("get:threads", {});
+    ipcRenderer.on("get:threads", handleThreads);
   }, []);
 
   return (
@@ -207,7 +224,7 @@ const Start = () => {
             ) : (
               <button
                 onClick={() => handlePause()}
-                className="hover:bg-custom-hover3 hover:shadow-custom-gray relative border border-solid border-gray-500 bg-gray-500 px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300"
+                className="hover:shadow-custom-gray relative border border-solid border-gray-500 bg-gray-500 px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3"
               >
                 Pause
               </button>
@@ -261,7 +278,7 @@ const Start = () => {
           </p>
           <div
             ref={divRef1}
-            className="h-[20%] overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-green-500 flex flex-col gap-1"
+            className="flex h-[20%] flex-col gap-1 overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-green-500"
           ></div>
           <div className="h-[10%] rounded-lg bg-[#17182c]"></div>
         </div>
