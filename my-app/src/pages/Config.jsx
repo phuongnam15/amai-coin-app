@@ -33,7 +33,7 @@ function Confix() {
     <div className="flex h-full w-full items-center justify-center bg-transparent">
       <div className="flex w-1/2 flex-col gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-300">Config</h1>
+          <h1 className="text-2xl font-bold text-gray-300">Config</h1>
           <p className="text-sm text-gray-500">
             Recommend maximum threads: {recommendThreads}
           </p>
@@ -47,7 +47,7 @@ function Confix() {
             id="threads"
             onChange={formik.handleChange}
             type="number"
-            className="w-full rounded border-1 border-solid border-[#27273f] bg-transparent p-2 text-gray-400 outline-none"
+            className="w-full border-1 border-solid border-[#2f2f4d] bg-transparent p-2 text-gray-400 outline-none"
           />
         </label>
         <label htmlFor="telegram_id" className="w-full">
@@ -56,12 +56,12 @@ function Confix() {
             id="telegram_id"
             onChange={formik.handleChange}
             type="text"
-            className="w-full rounded border-1 border-solid border-[#27273f] bg-transparent p-2 text-gray-400 outline-none"
+            className="w-full border-1 border-solid border-[#2f2f4d] bg-transparent p-2 text-gray-400 outline-none"
           />
         </label>
         <button
           onClick={() => handleConfig()}
-          className="w-full rounded border-solid border-gray-600 bg-gray-500 py-3 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3 hover:shadow-custom-inset-gray"
+          className="w-full border-solid border-1 border-[#35355b] bg-[#35355b] py-3 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3 hover:shadow-custom-inset-gray"
         >
           Save
         </button>

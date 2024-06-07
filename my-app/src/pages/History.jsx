@@ -16,7 +16,7 @@ function History() {
   }, []);
   return (
     <div class="flex flex-col h-full w-full items-center justify-center p-5">
-      <div class="max-h-[80%] max-w-full overflow-scroll">
+      <div class="max-h-[80%] w-full overflow-scroll">
         <h1 className="text-lg font-bold text-gray-300 ml-2">Wallet</h1>
         <table class="w-full rounded-xl bg-[#27273f]">
           <thead>
@@ -32,7 +32,7 @@ function History() {
               return (
                 <tr
                   key={index}
-                  className={`${index === wallet.length - 1 ? "" : "border-b border-gray-600"}`}
+                  className={`${index === wallet.length - 1 ? "" : "border-b border-gray-600"} text-sm`}
                 >
                   <td class="break-words px-4 py-3">{row.time}</td>
                   <td class="break-words px-4 py-3 sm:max-w-[300px] xl:max-w-none">
@@ -50,7 +50,7 @@ function History() {
           </tbody>
         </table>
       </div>
-      <div class="max-h-[80%] max-w-full overflow-scroll">
+      <div class="max-h-[80%] w-full overflow-scroll">
         <h1 className="text-lg font-bold text-gray-300 ml-2">History</h1>
         <table class="w-full rounded-xl bg-[#27273f]">
           <thead>
@@ -67,7 +67,7 @@ function History() {
               return (
                 <tr
                   key={index}
-                  className={`${index === history.length - 1 ? "" : "border-b border-gray-600"}`}
+                  className={`${index === history.length - 1 ? "" : "border-b border-gray-600"} text-sm`}
                 >
                   <td class="break-words px-4 py-3">{row.total}</td>
                   <td class="break-words px-4 py-3 sm:max-w-[300px] xl:max-w-none font-bold text-green-500">

@@ -27,7 +27,7 @@ const Start = () => {
 
   const handleStart = () => {
     if (formik.values.listChecked.length === 0) {
-      alert("Please choose a coin to mine");
+      toast("Please choose a coin to start", "error");
       return;
     }
     setIsPause(false);
@@ -41,9 +41,7 @@ const Start = () => {
   const handleRenew = () => {
     ipcRenderer.send("renew", {});
 
-    if (divRef.current) {
-      divRef.current.innerHTML = "";
-    }
+    setMessages([]);
     if (divRef1.current) {
       divRef1.current.innerHTML = "";
     }
@@ -131,9 +129,10 @@ const Start = () => {
   useEffect(() => {
     const handleLog = (event, data) => {
       setMessages(data.messages);
-      setTotalScan(data?.qty);
+      setTotalScan(data.qty);
 
-      if (data.message && data.message !== "") {
+      console.log(data.message);
+      if (data.message !== "") {
         const parts = data.message.split(" ");
         const firstThree = parts.slice(0, 3).join(" ");
         const last = parts[3];
@@ -253,11 +252,6 @@ const Start = () => {
           })}
         </div>
         <div className="flex h-full w-full flex-col gap-2 overflow-auto rounded-2xl bg-[#27273f] p-3">
-          {/* <div className="flex justify-around font-bold">
-            <h3>Ai Minor</h3>
-            <span>0</span>
-            <p>Wallot Checked</p>
-          </div> */}
           <div
             ref={divRef}
             className="h-[60%] w-full grow overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-gray-400"

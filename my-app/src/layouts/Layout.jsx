@@ -24,7 +24,7 @@ const Layout = ({ children }) => {
   return (
     <div className="h-lvh w-lvw overflow-hidden bg-[#17182c]">
       <div className="m-auto flex h-full w-full gap-1 p-2">
-        <div className="flex flex-col items-center rounded-s-2xl border-1 border-solid border-[#27273f] p-3 backdrop-opacity-10">
+        <div className="flex flex-col items-center rounded-s-2xl border-1 border-solid border-[#2f2f4d] p-3 backdrop-opacity-10">
           <img src={dragon} alt={dragon} className="mt-2 h-12 w-12 flex-none" />
           <ul className="flex flex-1 flex-col justify-center gap-4 py-10">
             {menuItems.map((item, index) => {
