@@ -19,7 +19,7 @@ const db = new sqlite3.Database("btc.db", (err) => {
 parentPort.on("message", async (data) => {
   if (data.type === "start") {
     let workerValue = data.startValue;
-    let workerMessage = "";
+    let workerMessage = [];
 
     const promises = [];
     while (true) {
@@ -31,8 +31,7 @@ parentPort.on("message", async (data) => {
             const ethAddress = wallet.address.toLowerCase();
             await checkEthAddress(ethAddress, privateKeyBytes, db);
 
-            workerMessage += `<p>Generated Address: ${ethAddress}</p>`;
-            console.log(`Generated Address: ${ethAddress}`);
+            workerMessage.push(`Generated Address: ${ethAddress}`);
             workerValue += 1;
           })()
         );
@@ -47,7 +46,7 @@ parentPort.on("message", async (data) => {
         balance: balance,
         totalWallet: totalWallet,
       });
-      workerMessage = "";
+      workerMessage = [];
       workerValue = 0;
       successMessage = "";
       totalWallet = 0;
@@ -55,7 +54,7 @@ parentPort.on("message", async (data) => {
     }
   } else if (data.type === "terminate") {
     parentPort.close();
-    workerMessage = "";
+    workerMessage = [];
     workerValue = 0;
     successMessage = "";
     totalWallet = 0;

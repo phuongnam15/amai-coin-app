@@ -33,7 +33,7 @@ async function main(sender, numThreads) {
       }
     );
   }
-  let messages = "";
+  let messages;
   for (let i = 0; i < numThreads; i++) {
     const worker = new Worker("./worker.js");
     workers.push(worker);

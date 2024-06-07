@@ -18,7 +18,7 @@ const Start = () => {
   const [isPause, setIsPause] = useState(true);
   const [isRenew, setIsRenew] = useState(false);
   const [threads, setThreads] = useState(0);
-  const [idInterval, setIdInterval] = useState(null);
+  const [messages, setMessages] = useState([]);
   const formik = useFormik({
     initialValues: {
       listChecked: ["ethereum"],
@@ -130,19 +130,8 @@ const Start = () => {
   }
   useEffect(() => {
     const handleLog = (event, data) => {
-      if (data.messages) {
-        const fragment = document.createDocumentFragment();
-        const tempDiv = document.createElement("div");
-        tempDiv.innerHTML = data.messages;
-
-        while (tempDiv.firstChild) {
-          fragment.appendChild(tempDiv.firstChild);
-        }
-
-        divRef.current.appendChild(fragment);
-        divRef.current.scrollTop = divRef.current.scrollHeight;
-        setTotalScan(data?.qty);
-      }
+      setMessages(data.messages);
+      setTotalScan(data?.qty);
 
       if (data.message && data.message !== "") {
         const parts = data.message.split(" ");
@@ -272,7 +261,11 @@ const Start = () => {
           <div
             ref={divRef}
             className="h-[60%] w-full grow overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-gray-400"
-          ></div>
+          >
+            {messages.map((message, index) => {
+              return <p key={index}>{message}</p>;
+            })}
+          </div>
           <p className="w-full text-center text-[13px]">
             {totalPrivateKeys} Private Keys found
           </p>
