@@ -14,11 +14,11 @@ const Start = () => {
   const [totalScan, setTotalScan] = useState("0");
   const [totalBalance, setTotalBalance] = useState(0);
   const { toast } = useContext(toastContext);
-  const uniqueId = useId();
   const [isPause, setIsPause] = useState(true);
   const [isRenew, setIsRenew] = useState(false);
   const [threads, setThreads] = useState(0);
   const [messages, setMessages] = useState([]);
+  const [successMessages, setSuccessMessages] = useState([]);
   const formik = useFormik({
     initialValues: {
       listChecked: ["ethereum"],
@@ -120,37 +120,13 @@ const Start = () => {
         console.error("Failed to copy: ", err);
       });
   };
-  function cssEscape(value) {
-    if (value) {
-      return value.replace(/([^\w-])/g, "\\$1");
-    }
-    return value;
-  }
   useEffect(() => {
     const handleLog = (event, data) => {
       setMessages(data.messages);
       setTotalScan(data.qty);
 
-      console.log(data.message);
-      if (data.message !== "") {
-        const parts = data.message.split(" ");
-        const firstThree = parts.slice(0, 3).join(" ");
-        const last = parts[3];
-        const escapeId = cssEscape(uniqueId);
-
-        const html = `
-          <div class="flex gap-2 items-center">
-            <p>${firstThree}</p>
-            <button class="rounded bg-gray-700 px-2 py-1 text-xs font-bold text-green-400 hover:bg-gray-600" id="${uniqueId}" data-last="${last}">Copy</button>
-          </div>
-        `;
-
-        divRef1.current.insertAdjacentHTML("beforeend", html);
-        const copyButton = divRef1.current.querySelector(`#${escapeId}`);
-        if (copyButton) {
-          copyButton.onclick = () => handleCopy(last);
-        }
-        divRef1.current.scrollTop = divRef1.current.scrollHeight;
+      if (data.message.privateKey !== "") {
+        setSuccessMessages((prev) => [...prev, data.message]);
         setTotalPrivateKeys((prev) => prev + 1);
       }
       if (data.balance !== 0) {
@@ -170,7 +146,7 @@ const Start = () => {
     <div className="flex w-full">
       <div className="flex flex-col items-center gap-1">
         <div className="flex grow flex-col items-center gap-3 rounded-se-2xl bg-[#27273f] p-4">
-          <div className="flex grow flex-col gap-2">
+          <div className="flex grow flex-col gap-2 w-full">
             {statistics.map((statistic, index) => {
               return (
                 <div className="flex gap-4" key={index}>
@@ -178,7 +154,7 @@ const Start = () => {
                     <img
                       src={statistic.img}
                       alt={statistic.img}
-                      className="h-10 w-10 bg-[#2d2d53] p-2"
+                      className="h-10 w-10 p-1.5"
                     />
                   </div>
                   <div className="text-white">
@@ -266,7 +242,21 @@ const Start = () => {
           <div
             ref={divRef1}
             className="flex h-[20%] flex-col gap-1 overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-green-500"
-          ></div>
+          >
+            {successMessages.map((message, index) => {
+              return (
+                <div className="flex items-center gap-2" key={index}>
+                  <p>{message.successMessage}</p>
+                  <button
+                    className="rounded bg-gray-700 px-2 py-1 text-xs font-bold text-green-400 hover:bg-gray-600"
+                    onClick={() => handleCopy(message.privateKey)}
+                  >
+                    Copy
+                  </button>
+                </div>
+              );
+            })}
+          </div>
           <div className="h-[10%] rounded-lg bg-[#17182c]"></div>
         </div>
       </div>

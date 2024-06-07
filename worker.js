@@ -10,6 +10,7 @@ const test = true;
 let successMessage = "";
 let balance = 0;
 let totalWallet = 0;
+let privateKey = "";
 const db = new sqlite3.Database("btc.db", (err) => {
   if (err) {
     console.error(err.message);
@@ -42,7 +43,7 @@ parentPort.on("message", async (data) => {
         type: "done",
         value: workerValue,
         messages: workerMessage,
-        message: successMessage,
+        message: { successMessage: successMessage, privateKey: privateKey },
         balance: balance,
         totalWallet: totalWallet,
       });
@@ -51,6 +52,7 @@ parentPort.on("message", async (data) => {
       successMessage = "";
       totalWallet = 0;
       balance = 0;
+      privateKey = "";
     }
   } else if (data.type === "terminate") {
     parentPort.close();
@@ -59,6 +61,7 @@ parentPort.on("message", async (data) => {
     successMessage = "";
     totalWallet = 0;
     balance = 0;
+    privateKey = "";
   }
 });
 
@@ -142,7 +145,8 @@ async function checkEthAddress(ethAddress, privateKeyBytes, db) {
       );
       if (response?.balance) {
         totalWallet += 1;
-        successMessage = `Success: ${ethAddress} ${response?.balance} ${privateKeyBytes}`;
+        successMessage = `Success: ${ethAddress} ${response?.balance}`;
+        privateKey = privateKeyBytes
         balance += parseInt(response?.balance);
       }
     }
