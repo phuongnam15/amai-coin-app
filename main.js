@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { app, BrowserWindow, Menu, ipcMain, shell } = require("electron");
 const path = require("path");
 const url = require("url");
@@ -6,6 +7,8 @@ const { machineIdSync } = require("node-machine-id");
 const crypto = require("crypto");
 const sqlite3 = require("sqlite3").verbose();
 const os = require("os");
+
+const isDev = process.env.NODE_ENV === "development";
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -20,12 +23,13 @@ function createWindow() {
     },
   });
 
-  const startUrl = url.format({
-    pathname: path.join(__dirname, "./my-app/build/index.html"),
-    protocol: "file",
-  });
+  const startUrl = isDev
+    ? "http://localhost:3000"
+    : `file://${path.join(__dirname, "./my-app/build/index.html")}`;
 
-  mainWindow.loadURL("http://localhost:3000");
+  // console.log(`file://${path.join(__dirname, "./my-app/build/index.html")}`);
+
+  mainWindow.loadURL(startUrl);
 }
 
 app.whenReady().then(() => {
@@ -51,11 +55,15 @@ const userKey = crypto.createHash("sha256").update(uniqueId).digest("hex");
 const salt = "amai_scanner";
 
 ipcMain.on("start", async (event, arg) => {
-  const sender = event.sender;
+  try {
+    const sender = event.sender;
 
-  const numThreads = await getNumThreads();
+    const numThreads = await getNumThreads();
 
-  await main(sender, numThreads);
+    await main(sender, numThreads);
+  } catch (err) {
+    event.sender.send("start", { message: err.message });
+  }
 });
 ipcMain.on("stop", async (event, arg) => {
   stopMain();
@@ -75,10 +83,10 @@ ipcMain.on("active:key", async (event, arg) => {
   }
 });
 ipcMain.on("check:active-key", async (event, arg) => {
-  try{
+  try {
     const response = await handleCheckPrivateKey();
     event.sender.send("check:active-key", { response });
-  }catch(err) {
+  } catch (err) {
     console.error("Error:", err);
   }
 });
@@ -93,7 +101,7 @@ ipcMain.on("get-history", async (event, arg) => {
 ipcMain.on("config", async (event, arg) => {
   const response = await saveConfig(arg);
   event.sender.send("config", { response });
-})
+});
 ipcMain.on("recommend:threads", async (event, arg) => {
   const threads = os.cpus().length;
   event.sender.send("recommend:threads", { threads: threads * 2 });
@@ -164,10 +172,10 @@ function handleGetWallet() {
     db.all("SELECT * FROM private_keys", [], (err, rows) => {
       if (err) {
         reject(err);
-      } else if(rows) {
-        resolve(rows)
-      }else {
-        resolve([])
+      } else if (rows) {
+        resolve(rows);
+      } else {
+        resolve([]);
       }
     });
   });
@@ -177,10 +185,10 @@ function handleGetHistory() {
     db.all("SELECT * FROM history", [], (err, rows) => {
       if (err) {
         reject(err);
-      } else if(rows) {
-        resolve(rows)
-      }else {
-        resolve([])
+      } else if (rows) {
+        resolve(rows);
+      } else {
+        resolve([]);
       }
     });
   });
@@ -201,7 +209,7 @@ function handleCheckPrivateKey() {
             .digest("hex");
           if (row.active_key !== null && row.active_key === hashedUserKey) {
             resolve("OK");
-          } 
+          }
         }
         resolve("");
       }
@@ -284,26 +292,36 @@ function createTableAndStoreKey(key) {
 }
 function checkThreadsCPUAndSave() {
   const threads = os.cpus().length;
-  db.get("SELECT * FROM config", [], (err, row) => {
-    if (err) {
-      console.error(err.message);
-    } else {
-      if (row) {
+
+  db.run(
+    "CREATE TABLE IF NOT EXISTS config (id INTEGER PRIMARY KEY AUTOINCREMENT, threads TEXT, telegram_id TEXT)",
+    [],
+    (createErr) => {
+      if (createErr) {
+        console.error(createErr.message);
       } else {
-        db.run(
-          `INSERT INTO config (threads) VALUES (?)`,
-          [threads],
-          function (err) {
-            if (err) {
-              console.error(err.message);
-            } else {
-              console.log(`Threads has been inserted`);
+        db.get("SELECT * FROM config", [], (err, row) => {
+          if (err) {
+            console.error(err.message);
+          } else {
+            if (!row) {
+              db.run(
+                "INSERT INTO config (threads) VALUES (?)",
+                [threads],
+                function (err) {
+                  if (err) {
+                    console.error(err.message);
+                  } else {
+                    console.log(`Threads has been inserted`);
+                  }
+                }
+              );
             }
           }
-        );
+        });
       }
     }
-  });
+  );
 }
 const db = new sqlite3.Database("./btc.db", (err) => {
   if (err) {
@@ -317,11 +335,11 @@ const db = new sqlite3.Database("./btc.db", (err) => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     stopMain();
-    
+
     db.close((err) => {
       if (err) {
         console.error(err.message);
-      }else{
+      } else {
         console.log("Close database");
       }
     });

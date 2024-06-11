@@ -140,6 +140,9 @@ const Start = () => {
     ipcRenderer.on("log", handleLog);
     ipcRenderer.send("get:threads", {});
     ipcRenderer.on("get:threads", handleThreads);
+    ipcRenderer.on("start", (event, data) => {
+      console.log(data);
+    });
   }, []);
 
   return (

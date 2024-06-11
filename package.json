@@ -6,13 +6,60 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "start.dev": "npx electronmon --trace-warnings ."
+    "start.dev": "npx electronmon --trace-warnings .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.amaiscanner",
+    "productName": "Amai Scanner",
+    "copyright": "© 2024 Amai Agency",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "check-eth.js",
+      "worker.js",
+      "preload.js",
+      "btc.db",
+      "eth1.db",
+      "my-app/build",
+      "node_modules",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "node_modules/@noble/hashes",
+        "to": "node_modules/@noble/hashes"
+      },
+      {
+        "from": "node_modules/@adraffy/ens-normalize",
+        "to": "node_modules/@adraffy/ens-normalize"
+      },
+      {
+        "from": "node_modules/@noble/curves",
+        "to": "node_modules/@noble/curves"
+      },
+      {
+        "from": "btc.db",
+        "to": "btc.db"
+      },
+      {
+        "from": "eth1.db",
+        "to": "eth1.db"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "my-app/build/static/media/rabbit.43ea6567d21062272725.png",
+      "requestedExecutionLevel": "requireAdministrator"
+    }
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.7.2",
-    "electron": "^30.0.9",
+    "dotenv": "^16.4.5",
     "entropy-string": "^4.2.0",
     "ethers": "^6.12.2",
     "moment": "^2.30.1",
@@ -22,6 +69,8 @@
     "worker-threads": "^1.0.0"
   },
   "devDependencies": {
+    "electron": "^30.1.0",
+    "electron-builder": "^25.0.0-alpha.9",
     "electronmon": "^2.0.3"
   }
 }
