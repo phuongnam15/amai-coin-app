@@ -7,20 +7,22 @@ const { machineIdSync } = require("node-machine-id");
 const crypto = require("crypto");
 const sqlite3 = require("sqlite3").verbose();
 const os = require("os");
-// const uniqueId = machineIdSync();
-const uniqueId = "123123";
+const uniqueId = machineIdSync();
 const userKey = crypto.createHash("sha256").update(uniqueId).digest("hex");
 const salt = "amai_scanner";
-const db = new sqlite3.Database("./app.db", (err) => {
+const db = new sqlite3.Database("./app.db", async (err) => {
   if (err) {
     console.error(err.message);
   } else {
     console.log("Connected to the app.db database.");
-    createTableAndStoreKey(userKey);
+
+    await checkAndSaveIdMachine();
+    await checkThreadsCPUAndSave();
+    await createTableAndStoreKey();
   }
 });
 
-const isDev = process.env.NODE_ENV !== "development";
+const isDev = process.env.NODE_ENV === "development";
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -39,17 +41,12 @@ function createWindow() {
     ? "http://localhost:3000"
     : `file://${path.join(__dirname, "./my-app/build/index.html")}`;
 
-  // console.log(`file://${path.join(__dirname, "./my-app/build/index.html")}`);
 
   mainWindow.loadURL(startUrl);
 }
 
 app.whenReady().then(() => {
   createWindow();
-
-  checkAndSaveIdMachine();
-
-  checkThreadsCPUAndSave();
 
   mainWindow.on("closed", () => {
     //free up memmory when X window
@@ -265,116 +262,142 @@ function handleActivePrivateKey(activeKey) {
   });
 }
 function checkAndInsertKey(key) {
-  db.get(
-    `SELECT user_key FROM keys WHERE user_key = ?`,
-    [key],
-    function (err, row) {
-      if (err) {
-        console.error(err.message);
-      } else if (row) {
-        console.log("key already exists in the database.");
-      } else {
-        db.run(`INSERT INTO keys (user_key) VALUES (?)`, [key], function (err) {
-          if (err) {
-            console.error(err.message);
-          } else {
-            console.log(`A new key has been inserted`);
-          }
-        });
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT user_key FROM keys WHERE user_key = ?`,
+      [key],
+      function (err, row) {
+        if (err) {
+          console.error(err.message);
+          reject();
+        } else if (row) {
+          console.log("key already exists in the database.");
+          resolve();
+        } else {
+          db.run(
+            `INSERT INTO keys (user_key) VALUES (?)`,
+            [key],
+            function (err) {
+              if (err) {
+                console.error(err.message);
+              } else {
+                console.log(`A new key has been inserted`);
+              }
+            }
+          );
+          resolve();
+        }
       }
-    }
-  );
+    );
+  });
 }
-function createTableAndStoreKey(key) {
-  db.run(
-    `CREATE TABLE IF NOT EXISTS keys (
-      active_key TEXT NULL,
-      user_key TEXT NOT NULL
-  )`,
-    (err) => {
-      if (err) {
-        console.error(err.message);
-      } else {
-        checkAndInsertKey(key);
+function createTableAndStoreKey() {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `CREATE TABLE IF NOT EXISTS keys (
+        active_key TEXT NULL,
+        user_key TEXT NOT NULL
+    )`,
+      async (err) => {
+        if (err) {
+          console.error(err.message);
+          reject();
+        } else {
+          await checkAndInsertKey(userKey);
+        }
       }
-    }
-  );
+    );
+  });
 }
 function checkThreadsCPUAndSave() {
-  const threads = Math.round(os.cpus().length / 2);
+  return new Promise((resolve, reject) => {
+    const threads = Math.round(os.cpus().length / 2);
 
-  db.run(
-    "CREATE TABLE IF NOT EXISTS config (id INTEGER PRIMARY KEY AUTOINCREMENT, threads TEXT, telegram_id TEXT)",
-    [],
-    (createErr) => {
-      if (createErr) {
-        console.error(createErr.message);
-      } else {
-        db.get("SELECT * FROM config", [], (err, row) => {
-          if (err) {
-            console.error(err.message);
-          } else {
-            if (!row) {
+    db.run(
+      "CREATE TABLE IF NOT EXISTS config (id INTEGER PRIMARY KEY AUTOINCREMENT, threads TEXT, telegram_id TEXT)",
+      [],
+      (createErr) => {
+        if (createErr) {
+          console.error(createErr.message);
+          reject();
+        } else {
+          db.get("SELECT * FROM config", [], (err, row) => {
+            if (err) {
+              console.error(err.message);
+              reject();
+            } else {
+              if (!row) {
+                db.run(
+                  "INSERT INTO config (threads) VALUES (?)",
+                  [threads],
+                  function (err) {
+                    if (err) {
+                      console.error(err.message);
+                    } else {
+                      console.log(`Threads has been inserted`);
+                    }
+                  }
+                );
+              }
+              resolve();
+            }
+          });
+        }
+      }
+    );
+  });
+}
+function checkAndSaveIdMachine() {
+  return new Promise((resolve, reject) => {
+    db.get(
+      `SELECT name FROM sqlite_master WHERE type='table' AND name='id_machine'`,
+      (err, row) => {
+        if (err) {
+          console.error(err.message);
+          reject();
+        } else if (!row) {
+          db.run(`CREATE TABLE id_machine (id TEXT)`, (err) => {
+            if (err) {
+              console.error(err.message);
+            } else {
               db.run(
-                "INSERT INTO config (threads) VALUES (?)",
-                [threads],
-                function (err) {
+                `INSERT INTO id_machine(id) VALUES(?)`,
+                uniqueId,
+                (err) => {
                   if (err) {
                     console.error(err.message);
-                  } else {
-                    console.log(`Threads has been inserted`);
                   }
                 }
               );
             }
-          }
-        });
-      }
-    }
-  );
-}
-function checkAndSaveIdMachine() {
-  db.get(
-    `SELECT name FROM sqlite_master WHERE type='table' AND name='id_machine'`,
-    (err, row) => {
-      if (err) {
-        console.error(err.message);
-      } else if (!row) {
-        db.run(`CREATE TABLE id_machine (id TEXT)`, (err) => {
-          if (err) {
-            console.error(err.message);
-          } else {
-            db.run(`INSERT INTO id_machine(id) VALUES(?)`, uniqueId, (err) => {
-              if (err) {
-                console.error(err.message);
-              }
-            });
-          }
-        });
-      } else {
-        db.get(`SELECT id FROM id_machine`, (err, row) => {
-          if (err) {
-            console.error(err.message);
-          } else if (row.id !== uniqueId) {
-            console.log(123);
-            db.serialize(() => {
-              db.run(`DROP TABLE IF EXISTS config`);
-              db.run(`DROP TABLE IF EXISTS history`);
-              db.run(`DROP TABLE IF EXISTS keys`);
-              db.run(`DROP TABLE IF EXISTS private_keys`);
-              db.run(`UPDATE id_machine SET id = ?`, uniqueId, (err) => {
-                if (err) {
-                  console.error(err.message);
-                }
+          });
+          resolve();
+        } else {
+          db.get(`SELECT id FROM id_machine`, (err, row) => {
+            if (err) {
+              console.error(err.message);
+              reject();
+            } else if (row.id !== uniqueId) {
+              db.serialize(() => {
+                db.run(`DROP TABLE IF EXISTS config`);
+                db.run(`DROP TABLE IF EXISTS history`);
+                db.run(`DROP TABLE IF EXISTS keys`);
+                db.run(`DROP TABLE IF EXISTS private_keys`);
+                db.run(`UPDATE id_machine SET id = ?`, uniqueId, (err) => {
+                  if (err) {
+                    console.error(err.message);
+                  }
+                });
+                console.log("id machine");
               });
-            });
-          }
-        });
+              resolve();
+            }
+          });
+        }
       }
-    }
-  );
+    );
+  });
 }
-
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     stopMain();
