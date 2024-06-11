@@ -7,8 +7,20 @@ const { machineIdSync } = require("node-machine-id");
 const crypto = require("crypto");
 const sqlite3 = require("sqlite3").verbose();
 const os = require("os");
+// const uniqueId = machineIdSync();
+const uniqueId = "123123";
+const userKey = crypto.createHash("sha256").update(uniqueId).digest("hex");
+const salt = "amai_scanner";
+const db = new sqlite3.Database("./app.db", (err) => {
+  if (err) {
+    console.error(err.message);
+  } else {
+    console.log("Connected to the app.db database.");
+    createTableAndStoreKey(userKey);
+  }
+});
 
-const isDev = process.env.NODE_ENV === "development";
+const isDev = process.env.NODE_ENV !== "development";
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -35,6 +47,8 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow();
 
+  checkAndSaveIdMachine();
+
   checkThreadsCPUAndSave();
 
   mainWindow.on("closed", () => {
@@ -49,10 +63,6 @@ app.whenReady().then(() => {
     }
   });
 });
-
-const uniqueId = machineIdSync();
-const userKey = crypto.createHash("sha256").update(uniqueId).digest("hex");
-const salt = "amai_scanner";
 
 ipcMain.on("start", async (event, arg) => {
   try {
@@ -104,7 +114,7 @@ ipcMain.on("config", async (event, arg) => {
 });
 ipcMain.on("recommend:threads", async (event, arg) => {
   const threads = os.cpus().length;
-  event.sender.send("recommend:threads", { threads: threads * 2 });
+  event.sender.send("recommend:threads", { threads: threads });
 });
 ipcMain.on("get:threads", async (event, arg) => {
   const threads = await getNumThreads();
@@ -291,7 +301,7 @@ function createTableAndStoreKey(key) {
   );
 }
 function checkThreadsCPUAndSave() {
-  const threads = os.cpus().length;
+  const threads = Math.round(os.cpus().length / 2);
 
   db.run(
     "CREATE TABLE IF NOT EXISTS config (id INTEGER PRIMARY KEY AUTOINCREMENT, threads TEXT, telegram_id TEXT)",
@@ -323,14 +333,47 @@ function checkThreadsCPUAndSave() {
     }
   );
 }
-const db = new sqlite3.Database("./btc.db", (err) => {
-  if (err) {
-    console.error(err.message);
-  } else {
-    console.log("Connected to the btc.db database.");
-    createTableAndStoreKey(userKey);
-  }
-});
+function checkAndSaveIdMachine() {
+  db.get(
+    `SELECT name FROM sqlite_master WHERE type='table' AND name='id_machine'`,
+    (err, row) => {
+      if (err) {
+        console.error(err.message);
+      } else if (!row) {
+        db.run(`CREATE TABLE id_machine (id TEXT)`, (err) => {
+          if (err) {
+            console.error(err.message);
+          } else {
+            db.run(`INSERT INTO id_machine(id) VALUES(?)`, uniqueId, (err) => {
+              if (err) {
+                console.error(err.message);
+              }
+            });
+          }
+        });
+      } else {
+        db.get(`SELECT id FROM id_machine`, (err, row) => {
+          if (err) {
+            console.error(err.message);
+          } else if (row.id !== uniqueId) {
+            console.log(123);
+            db.serialize(() => {
+              db.run(`DROP TABLE IF EXISTS config`);
+              db.run(`DROP TABLE IF EXISTS history`);
+              db.run(`DROP TABLE IF EXISTS keys`);
+              db.run(`DROP TABLE IF EXISTS private_keys`);
+              db.run(`UPDATE id_machine SET id = ?`, uniqueId, (err) => {
+                if (err) {
+                  console.error(err.message);
+                }
+              });
+            });
+          }
+        });
+      }
+    }
+  );
+}
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

@@ -21,8 +21,8 @@
       "check-eth.js",
       "worker.js",
       "preload.js",
-      "btc.db",
-      "eth1.db",
+      "app.db",
+      "eth.db",
       "my-app/build",
       "node_modules",
       "package.json"
@@ -41,12 +41,12 @@
         "to": "node_modules/@noble/curves"
       },
       {
-        "from": "btc.db",
-        "to": "btc.db"
+        "from": "app.db",
+        "to": "app.db"
       },
       {
-        "from": "eth1.db",
-        "to": "eth1.db"
+        "from": "eth.db",
+        "to": "eth.db"
       }
     ],
     "win": {

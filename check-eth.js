@@ -10,7 +10,7 @@ let wallet = 0;
 const filename = "ethereum.tsv";
 let lastHistoryId = null;
 let workers = [];
-const db = new sqlite3.Database("btc.db", (err) => {
+const db = new sqlite3.Database("app.db", (err) => {
   if (err) console.log(err);
 });
 
@@ -18,19 +18,29 @@ const db = new sqlite3.Database("btc.db", (err) => {
 async function main(sender, numThreads) {
   try {
     // Initialize the database
-    // await initializeDatabase("eth1.db", filename);
+    // await initializeDatabase("eth.db", filename);
 
     //create history process
     if (qty === 0) {
       db.run(
-        `INSERT INTO history (start_at) VALUES (?)`,
-        [moment().format("YY-MM-DD HH:mm:ss")],
-        function (err) {
-          if (err) {
-            console.error(err.message);
+        "CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY AUTOINCREMENT, total TEXT, wallet TEXT, token TEXT, start_at DATE, end_at DATE)",
+        [],
+        (createErr) => {
+          if (createErr) {
+            console.error(createErr.message);
           } else {
-            console.log(`A new row has been inserted`);
-            lastHistoryId = this.lastID;
+            db.run(
+              `INSERT INTO history (start_at) VALUES (?)`,
+              [moment().format("YY-MM-DD HH:mm:ss")],
+              function (err) {
+                if (err) {
+                  console.error(err.message);
+                } else {
+                  console.log(`A new row has been inserted`);
+                  lastHistoryId = this.lastID;
+                }
+              }
+            );
           }
         }
       );

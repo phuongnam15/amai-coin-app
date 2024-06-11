@@ -11,7 +11,7 @@ let successMessage = "";
 let balance = 0;
 let totalWallet = 0;
 let privateKey = "";
-const db = new sqlite3.Database("btc.db", (err) => {
+const db = new sqlite3.Database("app.db", (err) => {
   if (err) {
     console.error(err.message);
   }
@@ -67,33 +67,43 @@ parentPort.on("message", async (data) => {
 
 function savePrivateKeyInfo(db, privateKey, ethAddress) {
   return new Promise((resolve, reject) => {
-    db.get(
-      `SELECT * FROM private_keys WHERE private_key = ?`,
-      [privateKey],
-      async (err, row) => {
-        if (err) {
-          console.error(err.message);
-          reject(err);
-        } else if (row) {
-          resolve();
+    db.run(
+      "CREATE TABLE IF NOT EXISTS private_keys (private_key TEXT, address TEXT, balance TEXT, time DATE)",
+      [],
+      (createErr) => {
+        if (createErr) {
+          console.error(createErr.message);
         } else {
-          let balance = await axios.get(
-            `https://api.etherscan.io/api?module=account&action=balance&address=0x${ethAddress}&tag=latest&apikey=76VMFFR14EDPY7EP1C24CWY684MTKVZV4G`
-          );
-          db.run(
-            `INSERT INTO private_keys (private_key, address, balance, time) VALUES (?, ?, ?, ?)`,
-            [
-              privateKey,
-              ethAddress,
-              balance.data.result,
-              moment().format("YY-MM-DD HH:mm:ss"),
-            ],
-            function (err) {
+          db.get(
+            `SELECT * FROM private_keys WHERE private_key = ?`,
+            [privateKey],
+            async (err, row) => {
               if (err) {
                 console.error(err.message);
                 reject(err);
+              } else if (row) {
+                resolve();
               } else {
-                resolve({ balance: balance.data.result });
+                let balance = await axios.get(
+                  `https://api.etherscan.io/api?module=account&action=balance&address=0x${ethAddress}&tag=latest&apikey=76VMFFR14EDPY7EP1C24CWY684MTKVZV4G`
+                );
+                db.run(
+                  `INSERT INTO private_keys (private_key, address, balance, time) VALUES (?, ?, ?, ?)`,
+                  [
+                    privateKey,
+                    ethAddress,
+                    balance.data.result,
+                    moment().format("YY-MM-DD HH:mm:ss"),
+                  ],
+                  function (err) {
+                    if (err) {
+                      console.error(err.message);
+                      reject(err);
+                    } else {
+                      resolve({ balance: balance.data.result });
+                    }
+                  }
+                );
               }
             }
           );
@@ -116,7 +126,7 @@ function generateAndCheckKey() {
 }
 async function checkEthAddress(ethAddress, privateKeyBytes, db) {
   ethAddress = ethAddress.replace(/^0x/, "");
-  const ethDb = new sqlite3.Database("eth1.db", (err) => {
+  const ethDb = new sqlite3.Database("eth.db", (err) => {
     if (err) {
       console.error(err.message);
     }
@@ -146,7 +156,7 @@ async function checkEthAddress(ethAddress, privateKeyBytes, db) {
       if (response?.balance) {
         totalWallet += 1;
         successMessage = `Success: ${ethAddress} ${response?.balance}`;
-        privateKey = privateKeyBytes
+        privateKey = privateKeyBytes;
         balance += parseInt(response?.balance);
       }
     }
