@@ -21,8 +21,6 @@
       "check-eth.js",
       "worker.js",
       "preload.js",
-      "app.db",
-      "eth.db",
       "my-app/build",
       "node_modules",
       "package.json"

@@ -10,7 +10,9 @@ const os = require("os");
 const uniqueId = machineIdSync();
 const userKey = crypto.createHash("sha256").update(uniqueId).digest("hex");
 const salt = "amai_scanner";
-const db = new sqlite3.Database("./app.db", async (err) => {
+const isDev = process.env.NODE_ENV === "development";
+const pathAppDb = isDev ? "./app.db" : path.resolve(__dirname, '..', 'app.db');
+const db = new sqlite3.Database(pathAppDb, async (err) => {
   if (err) {
     console.error(err.message);
   } else {
@@ -21,8 +23,6 @@ const db = new sqlite3.Database("./app.db", async (err) => {
     await createTableAndStoreKey();
   }
 });
-
-const isDev = process.env.NODE_ENV === "development";
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -38,7 +38,7 @@ function createWindow() {
   });
 
   const startUrl = isDev
-    ? "http://localhost:3000"
+    ? `file://${path.join(__dirname, "./my-app/build/index.html")}`
     : `file://${path.join(__dirname, "./my-app/build/index.html")}`;
 
 

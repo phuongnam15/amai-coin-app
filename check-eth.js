@@ -10,7 +10,9 @@ let wallet = 0;
 const filename = "ethereum.tsv";
 let lastHistoryId = null;
 let workers = [];
-const db = new sqlite3.Database("app.db", (err) => {
+const isDev = process.env.NODE_ENV === "development";
+const pathAppDb = isDev ? "./app.db" : path.resolve(__dirname, '..', 'app.db');
+const db = new sqlite3.Database(pathAppDb, (err) => {
   if (err) console.log(err);
 });
 

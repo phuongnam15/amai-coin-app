@@ -4,6 +4,10 @@ const ethers = require("ethers");
 const crypto = require("crypto");
 const axios = require("axios");
 const moment = require("moment");
+const isDev = process.env.NODE_ENV === "development";
+const path = require("path");
+const pathAppDb = isDev ? "./app.db" : path.resolve(__dirname, '..', 'app.db');
+const pathEthDb = isDev ? "./eth.db" : path.resolve(__dirname, '..', 'eth.db');
 
 const thresholdEntropy = 3.5;
 const test = true;
@@ -11,7 +15,8 @@ let successMessage = "";
 let balance = 0;
 let totalWallet = 0;
 let privateKey = "";
-const db = new sqlite3.Database("app.db", (err) => {
+let stopWorker = false; //flag to stop Promises
+const db = new sqlite3.Database(pathAppDb, (err) => {
   if (err) {
     console.error(err.message);
   }
@@ -27,10 +32,14 @@ parentPort.on("message", async (data) => {
       for (let i = 0; i < 50; i++) {
         promises.push(
           (async () => {
+            if (stopWorker) return;
+
             const privateKeyBytes = generateAndCheckKey();
             const wallet = new ethers.Wallet(privateKeyBytes);
             const ethAddress = wallet.address.toLowerCase();
             await checkEthAddress(ethAddress, privateKeyBytes, db);
+
+            if (stopWorker) return;
 
             workerMessage.push(`Generated Address: ${ethAddress}`);
             workerValue += 1;
@@ -39,6 +48,9 @@ parentPort.on("message", async (data) => {
       }
 
       await Promise.all(promises);
+
+      if (stopWorker) break;
+
       parentPort.postMessage({
         type: "done",
         value: workerValue,
@@ -55,7 +67,11 @@ parentPort.on("message", async (data) => {
       privateKey = "";
     }
   } else if (data.type === "terminate") {
+
+    stopWorker = true;
+
     parentPort.close();
+
     workerMessage = [];
     workerValue = 0;
     successMessage = "";
@@ -66,6 +82,7 @@ parentPort.on("message", async (data) => {
 });
 
 function savePrivateKeyInfo(db, privateKey, ethAddress) {
+  console.log("Checking...");
   return new Promise((resolve, reject) => {
     db.run(
       "CREATE TABLE IF NOT EXISTS private_keys (private_key TEXT, address TEXT, balance TEXT, time DATE)",
@@ -126,7 +143,7 @@ function generateAndCheckKey() {
 }
 async function checkEthAddress(ethAddress, privateKeyBytes, db) {
   ethAddress = ethAddress.replace(/^0x/, "");
-  const ethDb = new sqlite3.Database("eth.db", (err) => {
+  const ethDb = new sqlite3.Database(pathEthDb, (err) => {
     if (err) {
       console.error(err.message);
     }
