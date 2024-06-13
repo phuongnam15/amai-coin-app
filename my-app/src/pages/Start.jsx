@@ -148,7 +148,7 @@ const Start = () => {
   return (
     <div className="flex w-full">
       <div className="flex flex-col items-center gap-1">
-        <div className="flex grow flex-col items-center gap-3 rounded-se-2xl bg-[#27273f] bg-opacity-85 p-4 shadow-custom-inset-gray">
+        <div className="flex grow flex-col items-center gap-3 rounded-se-2xl bg-[#27273f] bg-opacity-70 p-4 shadow-custom-inset-gray">
           <div className="flex w-full grow flex-col gap-2">
             {statistics.map((statistic, index) => {
               return (
@@ -198,7 +198,7 @@ const Start = () => {
             )}
           </div>
         </div>
-        <div className="w-full rounded-ee-2xl bg-[#27273f] py-2 text-center text-white shadow-custom-inset-gray">
+        <div className="w-full rounded-ee-2xl bg-[#27273f] py-2 text-center bg-opacity-70 text-white shadow-custom-inset-gray">
           <h3 className="font-bold">Lam Software</h3>
           <p className="text-sm">v 0.0.1</p>
         </div>

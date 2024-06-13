@@ -17,16 +17,16 @@ function Confix() {
       threads: formik.values.threads,
       telegram_id: formik.values.telegram_id,
     });
+    ipcRenderer.once("config", (event, data) => {
+      if (data.response === "OK") {
+        toast("Config successfully", "success");
+      }
+    });
   };
   useEffect(() => {
     ipcRenderer.send("recommend:threads", {});
     ipcRenderer.on("recommend:threads", (event, data) => {
       setRecommendThreads(data.threads);
-    });
-    ipcRenderer.on("config", (event, data) => {
-      if (data.response === "OK") {
-        toast("Config successfully", "success");
-      }
     });
     ipcRenderer.send("stop", {});
   }, []);

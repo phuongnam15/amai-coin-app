@@ -29,11 +29,7 @@ const CheckKey = () => {
     ipcRenderer.send("active:key", {
       activeKey: formik.values.activeKey,
     });
-  };
-
-  useEffect(() => {
-    ipcRenderer.send("get-key", {});
-    ipcRenderer.on("active:key", (event, data) => {
+    ipcRenderer.once("active:key", (event, data) => {
       if (data.response === "OK") {
         toast("Activated !", "success");
         navigate("/start");
@@ -41,6 +37,10 @@ const CheckKey = () => {
         toast(data.response, "error");
       }
     });
+  };
+
+  useEffect(() => {
+    ipcRenderer.send("get-key", {});
     ipcRenderer.on("get-key", (event, data) => {
       setUserKey(data.userKey);
     });
