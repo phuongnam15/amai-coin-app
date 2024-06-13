@@ -12,11 +12,12 @@ export const ToastContextProvider = ({ children }) => {
     textAlign: "center",
     fontSize: "0.85rem",
     right: "0px",
+    zIndex: 999999,
   };
   const toast = (message, color) => {
     Toastify.toast({
       text: message,
-      duration: 1000,
+      duration: 2000,
       style: {
         ...styleAlert,
         backgroundColor: color === "success" ? "#4ad477" : "#f7502a",

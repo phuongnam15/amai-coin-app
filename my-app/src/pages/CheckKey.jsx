@@ -11,7 +11,8 @@ const CheckKey = () => {
   const [userKey, setUserKey] = useState("");
   const formik = useFormik({
     initialValues: {
-      activeKey: "9f3972453fbdad82c354af80f8892ba05087b37d1b21d8937ccb20b808501348",
+      activeKey:
+        "9f3972453fbdad82c354af80f8892ba05087b37d1b21d8937ccb20b808501348",
     },
   });
   const handleCopy = () => {
@@ -28,24 +29,24 @@ const CheckKey = () => {
     ipcRenderer.send("active:key", {
       activeKey: formik.values.activeKey,
     });
+  };
+
+  useEffect(() => {
+    ipcRenderer.send("get-key", {});
     ipcRenderer.on("active:key", (event, data) => {
-      if(data.response === "OK") {
+      if (data.response === "OK") {
         toast("Activated !", "success");
         navigate("/start");
-      }else{
+      } else {
         toast(data.response, "error");
       }
     });
-  };
-  
-  useEffect(() => {
-    ipcRenderer.send("get-key", {});
     ipcRenderer.on("get-key", (event, data) => {
       setUserKey(data.userKey);
     });
     ipcRenderer.send("check:active-key", {});
     ipcRenderer.on("check:active-key", (event, data) => {
-      if(data.response === "OK") {
+      if (data.response === "OK") {
         navigate("/start");
       }
     });
@@ -102,15 +103,15 @@ const CheckKey = () => {
           className="w-[80%] rounded border-1 border-solid border-gray-700 bg-transparent px-3 py-2 text-xs text-gray-300 outline-none"
           onChange={formik.handleChange}
         />
-        <div className="flex gap-3 w-[60%] mt-4">
-          <Link
+        <div className="mt-4 flex w-[60%] gap-3">
+          {/* <Link
             to="/start"
             className="text-center py-2 flex-1 relative rounded border border-solid border-purple-500 bg-purple-500 text-xs font-bold leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover hover:shadow-custom-inset"
           >
             Try it out
-          </Link>
+          </Link> */}
           <button
-            className="py-2 flex-1 relative rounded border border-solid border-pink-500 bg-pink-500 text-xs font-bold leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover2 hover:shadow-custom-inset-pink"
+            className="relative flex-1 rounded border border-solid border-pink-500 bg-pink-500 py-2 text-xs font-bold leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover2 hover:shadow-custom-inset-pink"
             onClick={() => handleActivePrivateKey()}
           >
             Active

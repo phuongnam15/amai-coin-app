@@ -16,17 +16,23 @@ export default {
         'custom-white': '0 0 3px rgba(255, 255, 255, 0.5)',
         'custom-inset': 'inset 0 -4px 20px rgba(124, 57, 237, 0.5)',
         'custom-inset-pink': 'inset 0 -4px 20px rgba(219, 112, 147, 0.5)',
+        'custom-inset-green': 'inset 0 -4px 20px rgba(78, 184, 76, 0.5)',
         'custom-inset-gray': 'inset 0 -4px 20px rgba(53, 53, 91, 0.9)',
+        'custom-gray': '0 4px 20px rgba(53, 53, 91, 0.9)',
         'custom-inset-2': '0 4px 20px rgba(111, 65, 210, 0.5)',
       },
       backgroundColor: {
         'custom-hover': 'rgba(124, 57, 237, 0.25)',
         'custom-hover2': 'rgba(219, 112, 147, 0.25)',
-        'custom-hover3': 'rgba(53, 53, 91, 0.25)'
+        'custom-hover3': 'rgba(53, 53, 91, 0.25)',
+        'custom-hover4': 'rgba(78, 184, 76, 0.25)'
       },
       letterSpacing: {
         wider1: '0.07em',
-      }
+      },
+      backgroundImage: {
+        'coin': "url('../src/assets/backgrounds/coin1.png')",
+      },
     },
   },
   plugins: [

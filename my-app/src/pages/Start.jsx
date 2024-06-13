@@ -21,7 +21,7 @@ const Start = () => {
   const [successMessages, setSuccessMessages] = useState([]);
   const formik = useFormik({
     initialValues: {
-      listChecked: ["ethereum"],
+      listChecked: ["all_chain"],
     },
   });
 
@@ -68,8 +68,8 @@ const Start = () => {
     //   img: "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
     // },
     {
-      name: "ethereum",
-      title: "Ethereum",
+      name: "all_chain",
+      title: "All Chain",
       img: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
     },
     // {
@@ -148,8 +148,8 @@ const Start = () => {
   return (
     <div className="flex w-full">
       <div className="flex flex-col items-center gap-1">
-        <div className="flex grow flex-col items-center gap-3 rounded-se-2xl bg-[#27273f] p-4">
-          <div className="flex grow flex-col gap-2 w-full">
+        <div className="flex grow flex-col items-center gap-3 rounded-se-2xl bg-[#27273f] bg-opacity-85 p-4 shadow-custom-inset-gray">
+          <div className="flex w-full grow flex-col gap-2">
             {statistics.map((statistic, index) => {
               return (
                 <div className="flex gap-4" key={index}>
@@ -174,7 +174,7 @@ const Start = () => {
             {isRenew ? (
               <button
                 onClick={() => handleRenew()}
-                className="relative border border-solid border-pink-600 bg-pink-600 px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover2 hover:shadow-custom-inset-pink"
+                className="hover:shadow-custom-inset-green relative border border-solid border-[#4eb84c] bg-[#4eb84c] px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3"
               >
                 Renew
               </button>
@@ -191,32 +191,32 @@ const Start = () => {
             ) : (
               <button
                 onClick={() => handlePause()}
-                className="hover:shadow-custom-gray relative border border-solid border-gray-500 bg-gray-500 px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3"
+                className="hover:shadow-custom-gray relative border-solid border-gray-500 bg-gray-500 px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3"
               >
                 Pause
               </button>
             )}
           </div>
         </div>
-        <div className="w-full rounded-ee-2xl bg-[#27273f] py-2 text-center text-white">
-          <h3 className="font-bold">Infinity Wallet Miner</h3>
+        <div className="w-full rounded-ee-2xl bg-[#27273f] py-2 text-center text-white shadow-custom-inset-gray">
+          <h3 className="font-bold">Lam Software</h3>
           <p className="text-sm">v 0.0.1</p>
         </div>
       </div>
       <div className="flex grow flex-col gap-5 px-4 pt-4 text-white">
-        <div className="flex justify-center space-x-4">
+        <div className="flex space-x-4">
           {listItemToCheck.map((item, index) => {
             return (
               <div className="flex flex-col items-center" key={index}>
                 <label
                   htmlFor={item.name}
-                  className={`flex cursor-pointer flex-col items-center rounded-md border-1 border-solid hover:shadow-custom-inset-2 ${formik.values.listChecked.includes(item.name) ? "border-[#6f41d2]" : "border-gray-700 hover:border-gray-500"} transition-border px-8 py-4 duration-200`}
+                  className={`transition-border relative flex cursor-pointer flex-col items-center rounded-md border-1 border-solid border-gray-700 px-4 py-2 duration-200 hover:border-gray-500 hover:shadow-custom-inset-2`}
                 >
-                  <img
+                  {/* <img
                     src={item.img}
                     alt={item.name}
                     className="mb-1 h-7 w-7"
-                  />
+                  /> */}
                   <input
                     type="checkbox"
                     checked={formik.values.listChecked.includes(item.name)}
@@ -224,16 +224,19 @@ const Start = () => {
                     className="hidden h-3 w-3 text-yellow-500"
                     id={item.name}
                   ></input>
+                  <span
+                    className={`absolute right-0.5 top-0.5 h-2 w-2 ${formik.values.listChecked.includes(item.name) ? "border-[#6f41d2] bg-[#804cef]" : "border-gray-700"} 00 rounded-full border-1 border-solid`}
+                  ></span>
                   <span className="text-[13px] font-bold">{item.title}</span>
                 </label>
               </div>
             );
           })}
         </div>
-        <div className="flex h-full w-full flex-col gap-2 overflow-auto rounded-2xl bg-[#27273f] p-3">
+        <div className="flex h-full w-full flex-col gap-2 overflow-auto rounded-2xl border-1 border-solid border-gray-700 p-3">
           <div
             ref={divRef}
-            className="h-[60%] w-full grow overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-gray-400"
+            className="h-[50%] w-full grow overflow-y-scroll rounded-2xl border-1 border-solid border-[#424268] bg-[#28283d] bg-opacity-85 p-2 text-[12.5px] text-gray-500 shadow-custom-inset-gray"
           >
             {messages.map((message, index) => {
               return <p key={index}>{message}</p>;
@@ -244,7 +247,7 @@ const Start = () => {
           </p>
           <div
             ref={divRef1}
-            className="flex h-[20%] flex-col gap-1 overflow-y-scroll rounded-lg bg-[#17182c] p-2 text-[12.5px] text-green-500"
+            className="flex h-[30%] flex-col gap-1 overflow-y-scroll rounded-2xl border-1 border-solid border-[#424268] bg-[#17182c] bg-opacity-85 p-2 text-[12.5px] tracking-wider text-[#5edd88] shadow-custom-inset-gray"
           >
             {successMessages.map((message, index) => {
               return (
@@ -260,7 +263,7 @@ const Start = () => {
               );
             })}
           </div>
-          <div className="h-[10%] rounded-lg bg-[#17182c]"></div>
+          {/* <div className="h-[10%] rounded-lg bg-[#17182c]"></div> */}
         </div>
       </div>
     </div>

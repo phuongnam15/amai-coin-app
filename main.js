@@ -38,7 +38,7 @@ function createWindow() {
   });
 
   const startUrl = isDev
-    ? `file://${path.join(__dirname, "./my-app/build/index.html")}`
+    ? "http://localhost:3000"
     : `file://${path.join(__dirname, "./my-app/build/index.html")}`;
 
 
@@ -388,7 +388,6 @@ function checkAndSaveIdMachine() {
                     console.error(err.message);
                   }
                 });
-                console.log("id machine");
               });
               resolve();
             }

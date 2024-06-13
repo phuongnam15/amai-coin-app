@@ -153,6 +153,7 @@ function initializeDatabase(databaseFile, tsvFile) {
 }
 
 function stopMain() {
+  if(workers.length === 0) return;
   workers.forEach((w) => w.postMessage({ type: "terminate" }));
 }
 async function renewMain() {

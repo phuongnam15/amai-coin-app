@@ -17,17 +17,18 @@ function Confix() {
       threads: formik.values.threads,
       telegram_id: formik.values.telegram_id,
     });
-    ipcRenderer.on("config", (event, data) => {
-      if (data.response === "OK") {
-        toast("Config successfully", "success");
-      }
-    });
   };
   useEffect(() => {
     ipcRenderer.send("recommend:threads", {});
     ipcRenderer.on("recommend:threads", (event, data) => {
       setRecommendThreads(data.threads);
     });
+    ipcRenderer.on("config", (event, data) => {
+      if (data.response === "OK") {
+        toast("Config successfully", "success");
+      }
+    });
+    ipcRenderer.send("stop", {});
   }, []);
   return (
     <div className="flex h-full w-full items-center justify-center bg-transparent">
@@ -61,7 +62,7 @@ function Confix() {
         </label>
         <button
           onClick={() => handleConfig()}
-          className="w-full border-solid border-1 border-[#35355b] bg-[#35355b] py-3 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3 hover:shadow-custom-inset-gray"
+          className="w-full border-1 border-solid border-[#35355b] bg-[#35355b] py-3 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3 hover:shadow-custom-inset-gray"
         >
           Save
         </button>

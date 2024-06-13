@@ -82,7 +82,6 @@ parentPort.on("message", async (data) => {
 });
 
 function savePrivateKeyInfo(db, privateKey, ethAddress) {
-  console.log("Checking...");
   return new Promise((resolve, reject) => {
     db.run(
       "CREATE TABLE IF NOT EXISTS private_keys (private_key TEXT, address TEXT, balance TEXT, time DATE)",

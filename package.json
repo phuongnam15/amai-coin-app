@@ -11,7 +11,7 @@
   },
   "build": {
     "appId": "com.amaiscanner",
-    "productName": "Amai Scanner",
+    "productName": "Lam Software",
     "copyright": "© 2024 Amai Agency",
     "directories": {
       "output": "dist"
