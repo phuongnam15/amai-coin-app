@@ -98,7 +98,6 @@ const CheckKey = () => {
         <input
           id="activeKey"
           type="text"
-          value="9f3972453fbdad82c354af80f8892ba05087b37d1b21d8937ccb20b808501348"
           placeholder="Enter private key here..."
           className="w-[80%] rounded border-1 border-solid border-gray-700 bg-transparent px-3 py-2 text-xs text-gray-300 outline-none"
           onChange={formik.handleChange}

@@ -6,10 +6,10 @@ const menuItems = [
     icon: "fa-solid fa-house",
     href: "/start",
   },
-  {
-    icon: "fa-solid fa-file-pen",
-    href: "/key",
-  },
+  // {
+  //   icon: "fa-solid fa-file-pen",
+  //   href: "/key",
+  // },
   {
     icon: "fa-solid fa-compass",
     href: "/history",

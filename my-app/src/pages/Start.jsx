@@ -247,7 +247,7 @@ const Start = () => {
           </p>
           <div
             ref={divRef1}
-            className="flex h-[30%] flex-col gap-1 overflow-y-scroll rounded-2xl border-1 border-solid border-[#424268] bg-[#17182c] bg-opacity-85 p-2 text-[12.5px] tracking-wider text-[#5edd88] shadow-custom-inset-gray"
+            className="flex h-[30%] flex-col gap-1 overflow-y-scroll rounded-2xl border-1 border-solid border-[#424268] bg-[#17182c] bg-opacity-85 p-3 text-[12.5px] tracking-wider text-[#5edd88] shadow-custom-inset-gray"
           >
             {successMessages.map((message, index) => {
               return (

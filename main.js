@@ -27,7 +27,7 @@ const db = new sqlite3.Database(pathAppDb, async (err) => {
 function createWindow() {
   mainWindow = new BrowserWindow({
     title: "",
-    width: 1000,
+    width: 1200,
     height: 700,
     webPreferences: {
       contextIsolation: true, //tách biệt mt của renderer và main hoặc preload, tránh tác động từ renderer đến main hoặc preload
@@ -43,6 +43,8 @@ function createWindow() {
 
 
   mainWindow.loadURL(startUrl);
+
+  Menu.setApplicationMenu(null);
 }
 
 app.whenReady().then(() => {
