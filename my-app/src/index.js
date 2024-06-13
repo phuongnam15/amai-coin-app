@@ -4,12 +4,15 @@ import "./index.css";
 import App from "./App.js";
 import { BrowserRouter, HashRouter } from "react-router-dom";
 import { ToastContextProvider } from "./contexts/toastContext";
+import { DataScanContextProvider } from "./contexts/dataScanContext.jsx";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <HashRouter>
     <ToastContextProvider>
-      <App />
+      <DataScanContextProvider>
+        <App />
+      </DataScanContextProvider>
     </ToastContextProvider>
   </HashRouter>,
 );

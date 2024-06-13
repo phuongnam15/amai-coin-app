@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
     ipcRenderer.on(chanel, func),
   once: (chanel, func) =>
     ipcRenderer.once(chanel, func),
+  removeListener: (chanel, func) =>
+    ipcRenderer.removeListener(chanel, func),
 });
 contextBridge.exposeInMainWorld("Toastify", {
   toast: (options) => Toastify(options).showToast(),

@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState, useId } from "react";
 import toastContext from "../contexts/toastContext";
+import dataScanContext from "../contexts/dataScanContext";
 const { useFormik } = require("formik");
 const rabbit = require("../assets/icons/rabbit.png");
 const thunder = require("../assets/icons/thunder.png");
@@ -8,17 +9,25 @@ const dollar = require("../assets/icons/dollar.png");
 
 const Start = () => {
   const ipcRenderer = window.ipcRenderer;
-  const divRef = useRef(null);
-  const divRef1 = useRef(null);
-  const [totalPrivateKeys, setTotalPrivateKeys] = useState(0);
-  const [totalScan, setTotalScan] = useState("0");
-  const [totalBalance, setTotalBalance] = useState(0);
   const { toast } = useContext(toastContext);
-  const [isPause, setIsPause] = useState(true);
-  const [isRenew, setIsRenew] = useState(false);
-  const [threads, setThreads] = useState(0);
-  const [messages, setMessages] = useState([]);
-  const [successMessages, setSuccessMessages] = useState([]);
+  const {
+    threads,
+    setThreads,
+    messages,
+    setMessages,
+    successMessages,
+    setSuccessMessages,
+    totalPrivateKeys,
+    setTotalPrivateKeys,
+    totalScan,
+    setTotalScan,
+    totalBalance,
+    setTotalBalance,
+    isPause,
+    setIsPause,
+    isRenew,
+    setIsRenew,
+  } = useContext(dataScanContext);
   const formik = useFormik({
     initialValues: {
       listChecked: ["all_chain"],
@@ -41,16 +50,13 @@ const Start = () => {
   const handleRenew = () => {
     ipcRenderer.send("renew", {});
 
-    setMessages([]);
-    if (divRef1.current) {
-      divRef1.current.innerHTML = "";
-    }
-
     setIsRenew(false);
     setIsPause(true);
     setTotalPrivateKeys(0);
     setTotalBalance(0);
     setTotalScan("0");
+    setMessages([]);
+    setSuccessMessages([]);
   };
   const handleChecked = (name) => {
     const { listChecked } = formik.values;
@@ -140,9 +146,11 @@ const Start = () => {
     ipcRenderer.on("log", handleLog);
     ipcRenderer.send("get:threads", {});
     ipcRenderer.on("get:threads", handleThreads);
-    ipcRenderer.on("start", (event, data) => {
-      console.log(data);
-    });
+
+    return () => {
+      ipcRenderer.removeListener("log", handleLog);
+      ipcRenderer.removeListener("get:threads", handleThreads);
+    };
   }, []);
 
   return (
@@ -174,7 +182,7 @@ const Start = () => {
             {isRenew ? (
               <button
                 onClick={() => handleRenew()}
-                className="hover:shadow-custom-inset-green relative border border-solid border-[#4eb84c] bg-[#4eb84c] px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3"
+                className="relative border border-solid border-[#4eb84c] bg-[#4eb84c] px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3 hover:shadow-custom-inset-green"
               >
                 Renew
               </button>
@@ -191,14 +199,14 @@ const Start = () => {
             ) : (
               <button
                 onClick={() => handlePause()}
-                className="hover:shadow-custom-gray relative border-solid border-gray-500 bg-gray-500 px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3"
+                className="relative border-solid border-gray-500 bg-gray-500 px-16 py-2 text-sm font-medium leading-none text-white no-underline transition-all duration-300 hover:bg-custom-hover3 hover:shadow-custom-gray"
               >
                 Pause
               </button>
             )}
           </div>
         </div>
-        <div className="w-full rounded-ee-2xl bg-[#27273f] py-2 text-center bg-opacity-70 text-white shadow-custom-inset-gray">
+        <div className="w-full rounded-ee-2xl bg-[#27273f] bg-opacity-70 py-2 text-center text-white shadow-custom-inset-gray">
           <h3 className="font-bold">Lam Software</h3>
           <p className="text-sm">v 0.0.1</p>
         </div>
@@ -234,10 +242,7 @@ const Start = () => {
           })}
         </div>
         <div className="flex h-full w-full flex-col gap-2 overflow-auto rounded-2xl border-1 border-solid border-gray-700 p-3">
-          <div
-            ref={divRef}
-            className="h-[50%] w-full grow overflow-y-scroll rounded-2xl border-1 border-solid border-[#424268] bg-[#28283d] bg-opacity-85 p-2 text-[12.5px] text-gray-500 shadow-custom-inset-gray"
-          >
+          <div className="h-[50%] w-full grow overflow-y-scroll rounded-2xl border-1 border-solid border-[#424268] bg-[#28283d] bg-opacity-85 p-2 text-[12.5px] text-[#9799bb] shadow-custom-inset-gray">
             {messages.map((message, index) => {
               return <p key={index}>{message}</p>;
             })}
@@ -245,10 +250,7 @@ const Start = () => {
           <p className="w-full text-center text-[13px]">
             {totalPrivateKeys} Private Keys found
           </p>
-          <div
-            ref={divRef1}
-            className="flex h-[30%] flex-col gap-1 overflow-y-scroll rounded-2xl border-1 border-solid border-[#424268] bg-[#17182c] bg-opacity-85 p-3 text-[12.5px] tracking-wider text-[#5edd88] shadow-custom-inset-gray"
-          >
+          <div className="flex h-[30%] flex-col gap-1 overflow-y-scroll rounded-2xl border-1 border-solid border-[#424268] bg-[#17182c] bg-opacity-85 p-3 text-[12.5px] tracking-wider text-[#5edd88] shadow-custom-inset-gray">
             {successMessages.map((message, index) => {
               return (
                 <div className="flex items-center gap-2" key={index}>

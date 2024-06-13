@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import dataScanContext from "../contexts/dataScanContext";
 
 function History() {
+  const { setIsRenew, isPause, setIsPause } = useContext(dataScanContext);
   const [history, setHistory] = useState([]);
   const [wallet, setWallet] = useState([]);
   const [tab, setTab] = useState(0); // [0: wallet, 1: history]
@@ -9,16 +11,29 @@ function History() {
     "border-[#9e71fe] text-[#9e71fe] dark:border-[#9e71fe] dark:text-[#9e71fe]";
   const inactiveTabStyle =
     "hover:border-gray-300 hover:text-gray-600 dark:hover:text-gray-300";
+
+  const handleGetWallet = (event, data) => {
+    setWallet(data.response);
+  };
+  const handleGetHistory = (event, data) => {
+    setHistory(data.response);
+  };
   useEffect(() => {
     ipcRenderer.send("get-wallet", {});
-    ipcRenderer.on("get-wallet", (event, data) => {
-      setWallet(data.response);
-    });
+    ipcRenderer.on("get-wallet", handleGetWallet);
     ipcRenderer.send("get-history", {});
-    ipcRenderer.on("get-history", (event, data) => {
-      setHistory(data.response);
-    });
+    ipcRenderer.on("get-history", handleGetHistory);
     ipcRenderer.send("stop", {});
+
+    if (!isPause) {
+      setIsPause(true);
+      setIsRenew(true);
+    }
+
+    return () => {
+      ipcRenderer.removeListener("get-wallet", handleGetWallet);
+      ipcRenderer.removeListener("get-history", handleGetHistory);
+    };
   }, []);
   return (
     <div className="flex h-full w-full flex-col gap-4 p-5">
@@ -45,7 +60,7 @@ function History() {
       </div>
       {tab === 0 ? (
         <div className="h-full w-full overflow-scroll">
-          <table className="w-full rounded-xl bg-[#27273f] shadow-custom-inset-gray bg-opacity-70">
+          <table className="w-full rounded-xl bg-[#27273f] bg-opacity-70 shadow-custom-inset-gray">
             <thead>
               <tr className="text-gray-200">
                 <th className="px-4 py-3 text-center">Time</th>
@@ -81,7 +96,7 @@ function History() {
         </div>
       ) : (
         <div className="h-full w-full overflow-scroll">
-          <table className="w-full rounded-xl bg-[#27273f] shadow-custom-inset-gray bg-opacity-70">
+          <table className="w-full rounded-xl bg-[#27273f] bg-opacity-70 shadow-custom-inset-gray">
             <thead>
               <tr className="text-gray-200">
                 <th className="px-4 py-3 text-center">Total</th>

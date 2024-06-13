@@ -1,8 +1,10 @@
 import { useFormik } from "formik";
 import { useContext, useEffect, useState } from "react";
 import toastContext from "../contexts/toastContext";
+import dataScanContext from "../contexts/dataScanContext";
 
 function Confix() {
+  const { setIsRenew, isPause, setIsPause } = useContext(dataScanContext);
   const ipcRenderer = window.ipcRenderer;
   const { toast } = useContext(toastContext);
   const [recommendThreads, setRecommendThreads] = useState(0);
@@ -29,6 +31,10 @@ function Confix() {
       setRecommendThreads(data.threads);
     });
     ipcRenderer.send("stop", {});
+    if(!isPause) {
+      setIsPause(true);
+      setIsRenew(true);
+    }
   }, []);
   return (
     <div className="flex h-full w-full items-center justify-center bg-transparent">
